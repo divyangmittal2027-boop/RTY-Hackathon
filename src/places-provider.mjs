@@ -21,7 +21,7 @@ export function normalizeOverpass(json) {
     if (seen.has(id)) continue;
     seen.add(id);
     const tags = item.tags || {};
-    const amenity = tags.amenity || tags.tourism || tags.office || 'landmark';
+    const amenity = tags.amenity || tags.shop || tags.tourism || tags.office || 'landmark';
     results.push({
       id, name, lat, lng,
       amenity: String(amenity),
@@ -38,10 +38,13 @@ export function makeOverpassQuery(lat,lng) {
     throw new RangeError('Invalid map coordinates');
   }
   const origin=latitude+','+longitude;
-  return '[out:json][timeout:10];('
-    +'nwr(around:2500,'+origin+')[amenity~"cafe|restaurant|fast_food|pharmacy|hospital|clinic|doctors|police|embassy"];'
-    +'nwr(around:2500,'+origin+')[tourism~"attraction|museum|gallery"];'
-    +');out center 130;';
+  // Public coverage is best-effort: the OSM database may omit some businesses.
+  // Scan a walkable neighbourhood and avoid giant citywide queries that time out.
+  return '[out:json][timeout:12];('
+    +'nwr(around:3500,'+origin+')[amenity~"cafe|restaurant|fast_food|food_court|ice_cream|pharmacy|hospital|clinic|doctors|police"];'
+    +'nwr(around:3500,'+origin+')[shop~"coffee|bakery|convenience"];'
+    +'nwr(around:3500,'+origin+')[tourism~"attraction|museum|gallery"];'
+    +');out center 250;';
 }
 
 export async function fetchPublicPlaces({
