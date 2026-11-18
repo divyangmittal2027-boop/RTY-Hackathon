@@ -39,6 +39,7 @@ const fs = require('node:fs');
   await page.locator('#rate-dialog').waitFor({state:'visible'});
   await page.locator('#rate-close').click();
   await page.locator('#rate-dialog').waitFor({state:'hidden'});
+  await page.locator('#detail-back').click();
 
   if (!(await page.locator('#sheet-content').innerText()).includes('Delhi')) throw Error('Map panel missing Delhi');
   await page.locator('#scan-nearby').click();
@@ -47,7 +48,7 @@ const fs = require('node:fs');
   if (!scanLabel.trim()) throw Error('Nearby discovery status missing');
   await page.locator('#city-strip [data-city="gurugram"]').click();
   if (!(await page.locator('#sheet-content .sheet-heading').innerText()).includes('Gurugram')) throw Error('City selection failed');
-  await page.locator('#sheet-content .place-row').first().click();
+  await page.locator('#sheet-content .place-row-main').first().click();
   await page.waitForSelector('#rate-current');
   await page.locator('#rate-current').click();
   await page.waitForSelector('#rate-dialog[open]');
