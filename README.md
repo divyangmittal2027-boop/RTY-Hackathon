@@ -124,7 +124,7 @@ See [RULES.md](RULES.md) for the full list.
 
 **Problem:** Ordinary review systems prioritize food, service, and ambiance, but rarely tell women whether a place has practical conditions that affect confidence and safety. People need to know more than an average star rating: staff behaviour, possible harassment, hygiene, and access to help matter.
 
-**What we built during the hackathon:** A responsive, map-first web prototype following the Naari product concept. It has a full-screen OpenStreetMap, a city selector for Delhi NCR, public amenity discovery via Overpass (best-effort), place search via OpenStreetMap Nominatim, a movable places panel, daytime/nighttime navigation controls, a transparent score breakdown, community-style ratings, local edits, a "My ratings" view, and official emergency telephone links. The main map displays a place's score only when illustrative or local review data exists. Unrated public directory listings have grey markers.
+**What we built during the hackathon:** A responsive, map-first web prototype following the Naari product concept. It has a full-screen OpenStreetMap, a city selector for Delhi NCR, public amenity discovery via Overpass (best-effort), place search via OpenStreetMap Nominatim, a movable places panel, daytime/nighttime navigation controls, a transparent score breakdown, guided interactive ratings with completion tracking, local review editing and deletion, a "My ratings" view, a private safety journal, and official emergency telephone links. Map pins indicate venue types through different colours; individual illustrative scores and the difference between sample and personal ratings are explained in the place details. Newly entered feedback appears immediately in the local score and personal-review panel.
 
 **Hardest technical part:** Separating map availability from place-data availability. Map tiles, location permission, public listing APIs, and ratings can fail independently. The interface is designed to show an initial map and fallback places even if one external provider fails, and to avoid presenting public directory listings as verified safe places. It never fabricates live community ratings for public listings.
 
@@ -144,22 +144,22 @@ node --check src/original-look.mjs
 node --test tests/*.test.mjs
 ```
 
-The fork also includes a browser walkthrough GitHub Action that exercises city switching, place details, local rating submission, and the profile's "My ratings" page. Screenshots from successful runs appear as workflow artifacts.
+The fork also includes a browser walkthrough GitHub Action that exercises city switching, place details, saving and editing ratings, review persistence after reload, the profile's "My ratings" page, and private note creation and deletion. Screenshots from successful runs appear as workflow artifacts.
 
 **Demo workflow (90 seconds):**
 
 1. Open the map, choose a Delhi NCR city, search or tap a public/sample place.
 2. Expand the panel to show place details and a clearly labelled sample score breakdown.
-3. Submit a Creep Level, Safety, Hygiene, and Washroom rating; add vibe tags and save.
-4. Return to the place and edit the rating. Open Profile → My ratings to show the locally saved review.
-5. Try the locate button and the emergency help panel. Demonstrate that unrated public places have no Naari safety certification.
+3. Open the new rating form and complete four visual inputs: Creep Level, Safety, Hygiene, and Washroom. Watch the completion bar and personal preview update; optionally choose vibe tags, infrastructure and a written observation.
+4. Save and see your note, individual ratings, and updated score in place details. Reopen to edit; then visit Profile → My ratings to edit or delete the saved review.
+5. Visit Inbox → Your safety journal, save a private observation, refresh and delete it. Then demonstrate the location action and emergency toolkit. All information remains separate from the earlier Naari application.
 
 **Prototype limitations and safety disclosure:**
 
 - **Not a safety certification.** A green score from fictional or user-entered reviews cannot guarantee personal safety; circumstances change. Do not use this prototype as the sole basis for safety-critical decisions.
 - **All preset sample venues, initial community-style ratings and scores are fictional demo material**, not real Naari reports. Public OpenStreetMap directory listings, when available, are not verified by Naari.
 - The daytime/nighttime selection changes the interface, but does not assert measured time-specific safety differences. There is no verified safe-route algorithm.
-- Reviews and "My ratings" are stored only in the local browser, not published to other users. There is no live member verification, real-time private messaging, or production database in this Buildathon prototype.
+- Reviews, "My ratings", and safety-journal notes are stored only in the user's browser, never published to other users. There is no live member verification, real-time private messaging, or production database in this Buildathon prototype. No part of the app links to or authenticates through the previous Naari product.
 - External public directory APIs may be rate-limited or unavailable. Maps require an internet connection. Location permission is optional.
 
-**Original product and compliance:** The team had previously developed a separate Naari application. The earlier product was used only to study the desired user experience and visual language. All application source in this fork was newly authored during the 18 November 2026 hacking window using AI-assisted development; no pre-existing project code was imported. The fork preserves the starter/genesis history and incremental implementation commits.
+**Buildathon provenance and separation:** This is an independent hackathon implementation, inspired by a prior product concept but built from newly authored code during the 18 November 2026 hacking window. No pre-existing project source or production backend was imported, connected, or modified. The fork preserves the original hackathon genesis and incremental implementation commits.
