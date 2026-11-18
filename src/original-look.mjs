@@ -248,15 +248,37 @@ function detailMetric(label,value,max=5){
 }
 function renderDetails(sheet,p){
   const r=rating(p),owner=state.reviews[p.id];
+  const ownerTags=owner?[...owner.vibe,...owner.tags,...owner.infra].slice(0,14):[];
+  const personal=owner?Math.round(((owner.safety+owner.hygiene+owner.washroom)/15*.8+(11-owner.creep)/10*.2)*100):null;
+  const demoCount=p.isDemo?p.reviews.length:0;
   sheet.innerHTML=`
     <button class="sheet-back" id="detail-back">‹ All places</button>
     <h2 class="detail-title">${esc(p.name)}</h2><p class="detail-subtitle">⌖ ${esc(p.address||p.area||state.city.name)}</p>
-    <div class="detail-score-row"><span class="score-disc ${r.color}" style="width:62px;height:62px;font-size:17px">${r.score??'—'}</span><p><b>${r.label}</b><br><small>${r.count} sample / local rating${r.count===1?'':'s'} · ${state.period==='day'?'Daytime':'After 11PM'} view</small></p></div>
-    ${r.count?`<div class="detail-section"><h3>The five metrics</h3><div class="metric-grid">${detailMetric('Creep level',r.creep,10)}${detailMetric('Safety',r.safety)}${detailMetric('Hygiene',r.hygiene)}${detailMetric('Washroom',r.washroom)}</div></div>`:
-    '<div class="demo-warning">Community safety has not yet been rated. A grey pin is not a safety endorsement.</div>'}
-    ${p.isDemo?'<div class="demo-warning">This venue and its preset feedback are fictional demonstration data. The score is not a real safety assessment.</div>':'<div class="demo-warning">Public directory listing. Naari has not verified hours, service, safety, or staff.</div>'}
-    <div class="actions-row"><button class="solid-button" id="rate-current">${owner?'Edit my rating':'Be the first one to rate'}</button><button class="outline-button" id="directions-current">Get directions ↗</button><button class="outline-button" id="route-current">Route</button></div>
-    <p class="data-notice">${p.description?esc(p.description)+' · ':''}Your review stays on this device in the hackathon prototype.</p>
+    <div class="detail-score-row">
+      <span class="score-disc ${r.color}" style="width:62px;height:62px;font-size:17px">${r.score??'—'}</span>
+      <p><b>${r.label}</b><br>
+      <small>${r.count} rating${r.count===1?'':'s'} (${demoCount} demo, ${owner?1:0} local) · Not safety-verified</small></p>
+    </div>
+    ${r.count?`<div class="detail-section"><h3>What each rating says</h3><div class="metric-grid">
+       ${detailMetric('Creep level',r.creep,10)}
+       ${detailMetric('Safety',r.safety)}
+       ${detailMetric('Hygiene',r.hygiene)}
+       ${detailMetric('Washroom',r.washroom)}
+      </div></div>`:'<div class="demo-warning">No community or personal ratings yet. A map listing is not a safety endorsement.</div>'}
+    ${owner?`<section class="my-review-box">
+      <strong>✦ Your review · ${personal}/100 illustrative personal score</strong>
+      <p>👀 Creep concern ${owner.creep}/10 · 🛡 Safety ${owner.safety}/5 · ✦ Hygiene ${owner.hygiene}/5 · 🚻 Washroom ${owner.washroom}/5</p>
+      ${owner.comment?`<p class="saved-review-comment">“${esc(owner.comment)}”</p>`:''}
+      ${ownerTags.length?`<div class="tag-preview">${ownerTags.map(tag=>`<span>${esc(tag)}</span>`).join('')}</div>`:''}
+      <small>Saved privately in this browser · You can edit your review below.</small>
+     </section>`:'<div class="demo-warning">You haven’t rated this place yet. Your first review can help you track your own experience.</div>'}
+    ${p.isDemo?'<div class="demo-warning">This venue and its preset feedback are fictional demonstration data. Scores are illustrative, not an indication of actual safety.</div>':'<div class="demo-warning">Public directory listing. Naari has not verified operating hours, facilities, or the safety of this place.</div>'}
+    <div class="actions-row">
+      <button type="button" class="solid-button" id="rate-current">${owner?'✎ Edit my rating':r.count?'✦ Add my rating':'✦ Be the first to rate'}</button>
+      <button type="button" class="outline-button" id="directions-current">Get directions ↗</button>
+      <button type="button" class="outline-button" id="route-current">Route</button>
+    </div>
+    <p class="data-notice">${p.description?esc(p.description)+' · ':''}This hackathon version keeps your review on this device. It is not published to others.</p>
   `;
   $('#detail-back').onclick=backToPlaces;
   $('#rate-current').onclick=()=>openRate(p);
