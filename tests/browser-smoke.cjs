@@ -16,7 +16,7 @@ const fs = require('node:fs');
   await page.locator('#rate-current').click();
   await page.waitForSelector('#rate-dialog[open]');
   await page.locator('#rate-form').evaluate(form => form.requestSubmit());
-  await page.waitForSelector('#rate-dialog:not([open])');
+  await page.locator('#rate-dialog').waitFor({ state: 'hidden' });
   const localReview = await page.evaluate(() => localStorage.getItem('naari-map-reviews-2026-11-18'));
   if (!localReview || localReview==='{}') throw Error('Rating did not persist locally');
   await page.screenshot({ path: 'artifacts/naari-detail.png', fullPage: true });
