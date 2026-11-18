@@ -122,3 +122,31 @@
   .rate-dialog .star-choice{font-size:30px}
   .rate-dialog .creep-button{min-height:27px;font-size:10px}
 }
+
+/* Add-your-own-place fallback when public directories do not respond */
+.add-personal-place{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  border:1px dashed #a9bba3;color:#54704f;background:#edf4e8;
+  border-radius:12px;padding:13px;font-weight:800;font-size:12px;margin:12px 0;
+}
+.add-personal-place:hover{background:#dfeadb;border-style:solid}
+.add-personal-place span{font-size:23px;line-height:13px}
+.add-place-dialog .add-place-illustration{
+  border-radius:14px;background:#e8eee4;display:flex;align-items:center;gap:13px;
+  padding:15px;margin:6px 0 22px
+}
+.add-place-dialog .add-place-illustration svg{width:31px;height:31px;color:#617d5b;flex:0 0 31px}
+.add-place-illustration strong{font-size:13px}
+.add-place-illustration p{font-size:11px;line-height:1.6;color:var(--muted);margin:5px 0 0}
+.add-place-label{display:block;font-size:12px;font-weight:800;margin:18px 0 8px}
+.add-place-label span{color:var(--red)}
+.add-place-dialog input,.add-place-dialog select{
+  display:block;width:100%;background:#fff;border:1px solid var(--border);
+  border-radius:10px;padding:12px;font-size:13px;color:var(--ink)
+}
+.add-place-location{display:flex;gap:12px;padding:13px;margin-top:20px;background:var(--panel);border-radius:12px}
+.add-place-location>svg{width:21px;height:21px;color:var(--sage);flex:0 0 21px}
+.add-place-location b{font-size:12px}
+.add-place-location p{font-size:11px;color:var(--secondary);margin:5px 0}
+.add-place-location small{font-size:10px;line-height:1.5;color:var(--muted);display:block}
+.add-place-dialog .submit-review{margin-bottom:2px}
