@@ -20,6 +20,7 @@ jobs:
         run: |
           node --check src/safety.mjs
           node --check src/places.mjs
+          node --check src/places-provider.mjs
           node --check src/app.mjs
           node --check src/original-look.mjs
       - name: Run safety scoring tests
