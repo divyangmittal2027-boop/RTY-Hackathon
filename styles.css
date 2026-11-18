@@ -35,3 +35,12 @@
 /* Match the newer original build: keep emergencies accessible from the Safe action. */
 .emergency-banner{display:none}
 .prototype-mark{display:none}
+
+/* Match original Naari's desktop Expo layout: map and bottom sheet are full width. */
+@media(min-width:880px){
+  .top-controls{max-width:none;left:0;right:0}
+  .map-search{min-width:0}
+  .places-sheet{width:100%;left:0;right:0;border-radius:24px 24px 0 0}
+  .places-sheet.expanded{height:86%}
+  .floating-actions{right:16px;bottom:calc(34% + 20px)}
+}
