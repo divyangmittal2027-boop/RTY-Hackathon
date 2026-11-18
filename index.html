@@ -17,6 +17,30 @@
 </head>
 <body>
 <div id="application" class="application">
+  <section id="welcome-overlay" class="welcome-overlay" aria-label="Naari demo welcome">
+    <div class="welcome-panel">
+      <div class="welcome-photo" role="img" aria-label="Woman walking in an urban environment at golden hour">
+        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1350&q=85" alt="Portrait of a woman in warm natural light" referrerpolicy="no-referrer">
+        <div class="welcome-photo-shade"></div>
+        <div class="welcome-photo-top"><span class="welcome-wordmark">naari<span>✳</span></span><span class="demo-glow">LIVE BUILDATHON DEMO</span></div>
+        <div class="welcome-photo-bottom"><span class="welcome-small">A CITY THAT FEELS LIKE YOURS</span><h2>Go out.<br>Look around.<br><em>Own your city.</em></h2><p>Explore places through a woman's perspective. Your experiences matter.</p></div>
+      </div>
+      <div class="welcome-form-area">
+        <div class="welcome-orb">✳</div>
+        <p class="welcome-eyebrow">SHE BELONGS EVERYWHERE</p>
+        <h1>Every place has<br><em>a story.</em></h1>
+        <p class="welcome-subtitle">Find cafés, restaurants and essentials near you. See what matters beyond ordinary stars and build your personal safety map.</p>
+        <form id="welcome-form" class="welcome-demo-form">
+          <label for="demo-name">YOUR NAME <span>OPTIONAL</span></label>
+          <input type="text" id="demo-name" maxlength="48" placeholder="What should we call you?" autocomplete="nickname">
+          <button id="demo-access" type="submit" class="demo-enter-button">Explore Naari <span>↗</span></button>
+        </form>
+        <div class="demo-login-divider"><span>NO PASSWORD · NO ACCOUNT NEEDED</span></div>
+        <p class="welcome-fineprint">Demo mode bypasses authentication. Photos, notes and ratings are stored locally on this device, not synced with other people. This is not a certified safety service.</p>
+        <div class="welcome-mini-trust"><span>✦ Community-shaped insights</span><span>♡ Built for confidence</span></div>
+      </div>
+    </div>
+  </section>
   <section class="map-page view-active" id="map-page" aria-label="Naari safety map">
     <div id="safety-map" class="map-viewport"><div class="map-unavailable"><span class="fallback-glyph">⌖</span><b>Loading your map…</b><small>Place listings remain available even if the map cannot load.</small></div></div>
     <div class="top-controls">
@@ -78,7 +102,30 @@
 
   <section id="profile-page" class="secondary-page" hidden>
     <div class="section-top"><p class="kicker">YOUR NAARI SPACE</p><h1>My profile</h1><p>Your ratings, preferences, and safety essentials.</p></div>
-    <div class="profile-card"><div class="avatar-large"><i data-lucide="user"></i></div><h2>Browse freely. Join when ready.</h2><p>Explore the map and read sample ratings. Your own reviews are stored on this browser only in the hackathon demo.</p></div>
+    <div class="profile-hero">
+      <div class="profile-cover"><div class="profile-cover-label">✦ <span>MY NAARI CORNER</span></div><div class="profile-cover-decor">✳</div></div>
+      <div class="profile-top">
+        <label class="profile-avatar-action" title="Upload a profile picture">
+          <span class="profile-avatar-frame" id="profile-avatar-frame"><img id="profile-photo" alt="Your demo profile picture" hidden><span id="profile-avatar-fallback">✿</span></span>
+          <span class="avatar-edit-icon"><i data-lucide="camera"></i></span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" id="profile-avatar-input" aria-label="Upload a profile picture">
+        </label>
+        <div class="profile-heading"><span class="profile-chip">✦ DEMO EXPLORER</span><h2 id="profile-headline">Your profile</h2><p>Your city, your ratings, your little corner of Naari.</p></div>
+      </div>
+      <div class="profile-stats">
+        <div><strong id="profile-rating-count">0</strong><span>Places rated</span></div>
+        <div><strong id="profile-place-count">0</strong><span>Places discovered</span></div>
+        <div><strong id="profile-journal-count">0</strong><span>Private notes</span></div>
+      </div>
+      <form id="profile-edit-form" class="profile-edit-form">
+        <div class="profile-edit-head"><h3>Your story</h3><span>Editable demo profile</span></div>
+        <label for="profile-display-name">DISPLAY NAME</label>
+        <input type="text" id="profile-display-name" maxlength="48" placeholder="Your name" autocomplete="nickname">
+        <label for="profile-bio">ABOUT YOU</label>
+        <textarea id="profile-bio" maxlength="220" rows="3" placeholder="Coffee lover, city explorer, and always up for a new neighbourhood..."></textarea>
+        <div class="profile-edit-foot"><small>Visible only in this browser. Photos are compressed before saving.</small><button type="submit" class="solid-button" id="profile-save">Save profile <span>→</span></button></div>
+      </form>
+    </div>
     <div class="profile-section"><h3>My ratings</h3><div id="my-ratings"></div></div>
     <div class="profile-section"><h3>Safety toolkit</h3><a class="setting-row" href="tel:112"><i data-lucide="phone"></i><div><b>Emergency assistance</b><small>Call India's emergency number 112</small></div><span>›</span></a><button class="setting-row" id="profile-city-link"><i data-lucide="map-pin"></i><div><b>My current city</b><small id="profile-city">New Delhi</small></div><span>›</span></button></div>
   </section>
