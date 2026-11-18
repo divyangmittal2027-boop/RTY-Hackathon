@@ -150,7 +150,7 @@ function renderCityChips(){
 function selectCity(id){
   const city=CITIES.find(c=>c.id===id);if(!city)return;
   state.city=city;state.location=null;state.query='';$('#map-search').value='';
-  state.external=[];state.filter='all';state.selected=null;state.routeMode=false;state.safetyMode=false;
+  state.external=loadKnownPlaces();state.filter='all';state.selected=null;state.routeMode=false;state.safetyMode=false;
   state.expanded=false;$('#places-sheet').classList.remove('expanded');
   renderCityChips();switchTab('map');renderSheet();renderPins();
   if(state.map)state.map.setView([city.lat,city.lng],city.zoom);
@@ -389,24 +389,73 @@ function renderCityGrid(){
   $('#cities-list').innerHTML=CITIES.map(c=>`<button class="city-tile ${state.city.id===c.id?'active':''}" data-choose="${c.id}"><b>⌖ ${c.name}</b><small>Explore places and services →</small></button>`).join('');
   $$('#cities-list [data-choose]').forEach(b=>b.onclick=()=>selectCity(b.dataset.choose));
 }
+const JOURNAL_KEY='naari-private-safety-journal-2026-11-18';
+function getJournal() {
+  try {
+    const data=JSON.parse(localStorage.getItem(JOURNAL_KEY)||'[]');
+    return Array.isArray(data)?data.filter(x=>x&&typeof x.message==='string').slice(0,100):[];
+  }catch{return [];}
+}
+function renderJournal(){
+  const entries=getJournal();
+  $('#journal-count').textContent=entries.length+' saved note'+(entries.length===1?'':'s');
+  $('#journal-notes').innerHTML=entries.length?entries.map(note=>{
+    const date=new Date(note.date);
+    const pretty=Number.isFinite(date.getTime())?date.toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}):'Saved on this device';
+    return `<article class="journal-note"><div class="journal-note-head"><span>✦ ${esc(pretty)}</span><button type="button" data-journal-delete="${esc(note.id)}" aria-label="Delete this private note"><i data-lucide="trash-2"></i> Delete</button></div><p>${esc(note.message)}</p></article>`;
+  }).join(''):'<div class="journal-empty"><i data-lucide="notebook-pen"></i><b>No notes yet</b><p>Write your first private note above. You can delete it whenever you like.</p></div>';
+  $$('#journal-notes [data-journal-delete]').forEach(button=>button.onclick=()=>{
+    const next=getJournal().filter(n=>n.id!==button.dataset.journalDelete);
+    try{localStorage.setItem(JOURNAL_KEY,JSON.stringify(next));notify('Note removed from this device');}catch{notify('Unable to remove note');}
+    renderJournal();
+  });
+  refreshIcons();
+}
+function saveJournal(event){
+  event.preventDefault();
+  const message=$('#journal-entry').value.trim();
+  if(!message){notify('Write a note before saving.');return;}
+  const next=[{id:'note-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date:new Date().toISOString(),message:message.slice(0,500)},...getJournal()].slice(0,100);
+  try{
+    localStorage.setItem(JOURNAL_KEY,JSON.stringify(next));
+    $('#journal-entry').value='';
+    renderJournal();
+    notify('Private note saved on this device');
+  }catch{notify('Browser storage is unavailable. Note could not be saved.');}
+}
 function renderProfile(){
   $('#profile-city').textContent=state.city.name;
-  const reviews=Object.entries(state.reviews);
+  const reviews=Object.entries(state.reviews).sort((a,b)=>(b[1].updatedAt||'').localeCompare(a[1].updatedAt||''));
   $('#my-ratings').innerHTML=reviews.length?reviews.map(([id,r])=>{
     const p=allPlaces().find(x=>x.id===id);
-    return `<div class="rating-summary-row"><div><b>${esc(p?.name||'Previously rated place')}</b><small>Safety ${r.safety}/5 · Hygiene ${r.hygiene}/5 · Washroom ${r.washroom}/5</small></div><button data-edit="${esc(id)}">Edit</button></div>`;
+    const d=r.updatedAt?new Date(r.updatedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'Saved locally';
+    return `<article class="rating-summary-row">
+      <div><b>${esc(p?.name||'Previously rated place')}</b>
+        <small>Creep ${r.creep}/10 · Safety ${r.safety}/5 · Hygiene ${r.hygiene}/5 · Washroom ${r.washroom}/5</small>
+        <small>${esc(d)} · Saved on this device only</small>
+        ${r.comment?`<p class="saved-review-comment">“${esc(r.comment)}”</p>`:''}
+      </div>
+      <span class="profile-review-actions"><button type="button" data-edit="${esc(id)}">Edit</button><button type="button" data-delete-review="${esc(id)}" class="delete-review">Delete</button></span>
+    </article>`;
   }).join(''):'<p class="data-notice">You haven’t rated any places on this device yet. Open a place from the Map tab to share your experience.</p>';
   $$('#my-ratings [data-edit]').forEach(b=>b.onclick=()=>{
     const p=allPlaces().find(x=>x.id===b.dataset.edit);
     if(p){switchTab('map');openPlace(p.id);openRate(p);}
-    else notify('The original public listing is no longer in this demo session.');
+    else notify('This public listing is not currently available in the demo. Your rating remains saved.');
+  });
+  $$('#my-ratings [data-delete-review]').forEach(b=>b.onclick=()=>{
+    if(!window.confirm('Delete your rating from this device?'))return;
+    delete state.reviews[b.dataset.deleteReview];
+    const stored=persist();
+    renderProfile();renderPins();
+    notify(stored?'Your rating was removed':'Could not save this change on your device');
   });
 }
 function openRate(place){
   state.selected=place;
   const prev=state.reviews[place.id]||{};
   state.draft={
-    creep:prev.creep??3,safety:prev.safety??4,hygiene:prev.hygiene??4,washroom:prev.washroom??4,
+    creep:prev.creep??0,safety:prev.safety??0,hygiene:prev.hygiene??0,washroom:prev.washroom??0,
     vibe:[...(prev.vibe||[])],tags:[...(prev.tags||[])],infra:[...(prev.infra||[])]
   };
   $('#rate-title').textContent=place.name;
@@ -416,13 +465,19 @@ function openRate(place){
 }
 function drawRate(){
   const d=state.draft;
-  $('#creep-input').innerHTML=Array.from({length:10},(_,i)=>i+1).map(n=>`<button type="button" class="creep-button ${n<=d.creep?'selected':''}" data-creep="${n}" aria-pressed="${n===d.creep}">${n}</button>`).join('');
+  $('#creep-input').innerHTML=Array.from({length:10},(_,i)=>i+1).map(n=>`<button type="button" class="creep-button ${n<=d.creep?'selected':''}" data-creep="${n}" aria-label="Creep level ${n} of 10" aria-pressed="${n===d.creep}">${n}</button>`).join('');
   $$('#creep-input [data-creep]').forEach(b=>b.onclick=()=>{d.creep=Number(b.dataset.creep);drawRate();});
-  $('#creep-caption').textContent=d.creep<=3?'Secure — felt at ease':d.creep<=6?'Some discomfort':'Avoid — unsafe vibes';
+  $('#creep-caption').textContent=!d.creep?'Choose 1 if you felt at ease, 10 if you felt very unsafe':d.creep<=3?'Low concern · Felt at ease':d.creep<=6?'Some discomfort · Stay aware':'High concern · Felt unsafe';
+  const descriptions={
+    safety:['','Very unsafe','Somewhat unsafe','Mixed feelings','Mostly comfortable','Very comfortable'],
+    hygiene:['','Very poor','Poor','Fair','Good','Excellent'],
+    washroom:['','Very poor','Poor','Adequate','Clean','Very clean']
+  };
   for(const key of ['safety','hygiene','washroom']){
     const element=$('#'+key+'-stars');
     element.innerHTML=[1,2,3,4,5].map(n=>`<button type="button" class="star-choice ${n<=d[key]?'selected':''}" data-star="${n}" aria-label="${key} ${n} stars" aria-pressed="${d[key]===n}">★</button>`).join('');
     element.querySelectorAll('[data-star]').forEach(b=>b.onclick=()=>{d[key]=Number(b.dataset.star);drawRate();});
+    $('#'+key+'-caption').textContent=d[key]?`${d[key]} of 5 · ${descriptions[key][d[key]]}`:'Tap a star to rate this aspect';
   }
   for(const [key,items] of [['vibe',VIBES],['tags',TAGS],['infra',INFRA]]){
     const element=$('#'+key+'-input');
@@ -433,16 +488,34 @@ function drawRate(){
       drawRate();
     });
   }
+  const complete=['creep','safety','hygiene','washroom'].filter(key=>d[key]>0).length;
+  $('#review-progress-label').textContent=`${complete} of 4 ratings completed`;
+  $('#review-progress-percent').textContent=Math.round(complete/4*100)+'%';
+  $('#review-progress-fill').style.width=Math.round(complete/4*100)+'%';
+  $('#review-progress-fill').parentElement.setAttribute('aria-valuenow',String(complete));
+  $('#submit-review').disabled=complete!==4;
+  $('#submit-review').innerHTML=complete===4?'Save my review <span>→</span>':'Complete the four ratings <span>→</span>';
+  if(complete===4){
+    const personal=Math.round(((d.safety+d.hygiene+d.washroom)/15*.8+(11-d.creep)/10*.2)*100);
+    $('#rating-preview').innerHTML=`<div class="preview-sparkle">✦</div><div><b>Your experience, at a glance</b><p>${esc(d.safety)}/5 safety · ${esc(d.hygiene)}/5 hygiene · ${esc(d.washroom)}/5 washroom · ${esc(d.creep)}/10 creep concern</p><small>Illustrative personal experience score; not a safety certification.</small></div><div class="preview-score">${personal}<small>/100</small></div>`;
+  } else {
+    $('#rating-preview').innerHTML='<div class="preview-sparkle">✦</div><div><b>Each rating tells part of the story.</b><p>Complete four required ratings to preview your personal assessment.</p></div>';
+  }
 }
 function saveRate(e){
   e.preventDefault();
   if(!state.selected||!state.draft)return;
   const {creep,safety,hygiene,washroom}=state.draft;
-  if([creep,safety,hygiene,washroom].some(x=>!Number.isFinite(x))){notify('Please complete every rating');return;}
+  if([creep,safety,hygiene,washroom].some(x=>!Number.isFinite(x)||x<1)){
+    notify('Please complete all four required ratings.');return;
+  }
   state.reviews[state.selected.id]={...state.draft,comment:$('#rate-comment').value.trim().slice(0,300),updatedAt:new Date().toISOString()};
   persistKnownPlace(state.selected);
-  const saved=persist();$('#rate-dialog').close();renderSheet();renderPins();
-  notify(saved?'Your rating is saved locally.':'Rating updated in this tab; storage was unavailable.');
+  const saved=persist();
+  $('#rate-dialog').close();
+  renderSheet();renderPins();
+  if(saved)notify('Your rating is saved on this device. You can edit it anytime.');
+  else notify('Rating updated in this tab. Browser storage is unavailable.');
 }
 function init(){
   renderCityChips();
@@ -451,6 +524,8 @@ function init(){
   renderSheet();
   $$('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
   $('#profile-city-link').onclick=()=>switchTab('cities');
+  $('#journal-form').addEventListener('submit',saveJournal);
+  renderJournal();
   $('#map-search').addEventListener('input',filterSearch);
   $('#map-search').addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();searchPublicPlace($('#map-search').value.trim());}
