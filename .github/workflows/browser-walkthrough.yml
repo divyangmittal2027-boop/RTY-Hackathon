@@ -25,12 +25,14 @@ jobs:
       - name: Install browser runner
         run: |
           npm install --no-save playwright@1.53.0
-          npx playwright install --with-deps chromium
+          command -v google-chrome || command -v chromium
       - name: Start demo server
         run: |
           python3 -m http.server 8080 > /tmp/naari-server.log 2>&1 &
           sleep 2
       - name: Exercise map, rating, and profile
+        env:
+          CHROME_CHANNEL: chrome
         run: |
           mkdir -p artifacts
           node tests/browser-smoke.cjs
