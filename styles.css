@@ -330,3 +330,39 @@
 .quick-scan-arrow{font-size:21px;font-weight:600;line-height:1}
 @media(min-width:880px){.quick-scan-wrap{justify-content:flex-start}}
 @media(max-width:520px){.quick-scan-wrap{margin-top:7px}.quick-scan{padding:10px 15px;font-size:11px;min-width:0;width:100%;max-width:335px}}
+
+/* Warm, simple welcome photo: cozy illuminated street, not a portrait. */
+.welcome-photo>img{object-position:center 56%;filter:saturate(.92) contrast(1.04)}
+.welcome-photo-shade{background:linear-gradient(180deg,#20172751 0%,#241f2435 34%,#1b1424bd 100%)}
+.welcome-photo-bottom h2{font-size:clamp(52px,5.7vw,84px);letter-spacing:-1.8px}
+.welcome-photo-bottom h2 em{color:#ffdf94}
+.welcome-photo-bottom p{max-width:400px;font-weight:500}
+.welcome-photo-top .demo-glow{background:#21192b6b;border:1px solid #ffffff45}
+.quick-rate-wrap{margin:8px 16px 0;display:flex;justify-content:center;pointer-events:none}
+.quick-rate{
+ pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:11px;
+ width:min(92vw,340px);border-radius:999px;padding:12px 20px;background:#fffdfb;
+ border:2px solid #f4b35b;color:#8c3469;box-shadow:0 7px 25px #3a28592b;
+ font-size:13px;font-weight:800;transition:background .18s,transform .18s
+}
+.quick-rate:hover{background:#fff0f7;transform:translateY(-2px)}
+.quick-rate .rating-star{font-size:23px;color:#ee9d25}
+.quick-rate span:last-child{font-size:22px}
+.rateable-row{padding:8px 0;gap:8px}
+.place-row-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:0;background:transparent;text-align:left;padding:7px 0;cursor:pointer}
+.place-row-main:hover .place-description strong{color:#a62c7a}
+.row-rate-button{
+ flex:0 0 auto;padding:10px 13px;border-radius:999px;border:1px solid #f5b4d0;
+ background:#ffedf5;color:#ad367d;font-weight:800;font-size:11px;white-space:nowrap;
+ box-shadow:0 2px 8px #a7387310
+}
+.row-rate-button:hover{background:#facee1}
+@media(min-width:880px){.quick-rate-wrap{justify-content:flex-start}}
+@media(max-width:520px){
+ .welcome-photo>img{object-position:center 52%}
+ .welcome-photo-bottom h2{font-size:clamp(44px,11vw,58px)}
+ .quick-rate-wrap{margin-top:6px}
+ .quick-rate{max-width:335px;padding:10px 16px;font-size:12px}
+ .row-rate-button{padding:9px 10px;font-size:10px}
+ .place-row-main{gap:7px}
+}
