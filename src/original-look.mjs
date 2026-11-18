@@ -27,10 +27,11 @@ const FILTERS = [
   {id:'help',label:'Nearby help'}
 ];
 const REVIEWS_KEY='naari-map-reviews-2026-11-18';
+const PLACES_KEY='naari-map-saved-public-places-2026-11-18';
 const state = {
   city:CITIES[0], period:'day', filter:'all', query:'', selected:null,
   map:null, pins:new Map(), location:null, locationMarker:null, expanded:false,
-  routeMode:false, safetyMode:false, external:[], loading:false,
+  routeMode:false, safetyMode:false, external:loadKnownPlaces(), loading:false,
   reviews:loadSaved(), draft:null, searchTimer:null
 };
 
@@ -39,6 +40,20 @@ function loadSaved() {
     const candidate=JSON.parse(localStorage.getItem(REVIEWS_KEY)||'{}');
     return candidate && typeof candidate==='object' && !Array.isArray(candidate)?candidate:{};
   } catch {return {};}
+}
+function loadKnownPlaces() {
+  try {
+    const stored=JSON.parse(localStorage.getItem(PLACES_KEY)||'[]');
+    return Array.isArray(stored)?stored.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&typeof p.name==='string').slice(0,40):[];
+  } catch {return [];}
+}
+function persistKnownPlace(p) {
+  if(p.isDemo)return;
+  try {
+    const stored=loadKnownPlaces();
+    const unique=[p,...stored.filter(x=>x.id!==p.id)].slice(0,40);
+    localStorage.setItem(PLACES_KEY,JSON.stringify(unique));
+  } catch {}
 }
 function persist() {
   try{localStorage.setItem(REVIEWS_KEY,JSON.stringify(state.reviews)); return true;}catch{return false;}
@@ -76,7 +91,8 @@ function rating(place){
   const avg=(key)=>round1(reviews.reduce((sum,r)=>sum+Number(r[key]),0)/reviews.length);
   const [creep,safety,hygiene,washroom]=['creep','safety','hygiene','washroom'].map(avg);
   const score=Math.round(((safety+hygiene+washroom)/15*.8 + (11-creep)/10*.2)*100);
-  const adjusted=state.period==='night' ? Math.max(0,score-7):score;
+  // A day/night toggle cannot justify adjusting safety scores without time-specific evidence.
+  const adjusted=score;
   const color=adjusted>=70?'green':adjusted>=45?'amber':'red';
   return {count:reviews.length,score:adjusted,color,label:color==='green'?'Feels safe':color==='amber'?'Stay aware':'Avoid',creep,safety,hygiene,washroom};
 }
@@ -386,6 +402,7 @@ function saveRate(e){
   const {creep,safety,hygiene,washroom}=state.draft;
   if([creep,safety,hygiene,washroom].some(x=>!Number.isFinite(x))){notify('Please complete every rating');return;}
   state.reviews[state.selected.id]={...state.draft,comment:$('#rate-comment').value.trim().slice(0,300),updatedAt:new Date().toISOString()};
+  persistKnownPlace(state.selected);
   const saved=persist();$('#rate-dialog').close();renderSheet();renderPins();
   notify(saved?'Your rating is saved locally.':'Rating updated in this tab; storage was unavailable.');
 }
@@ -438,5 +455,7 @@ function init(){
   refreshIcons();
   // Places are fetched independently; slow public providers never hold the map hostage.
   fetchNearby(state.city.lat,state.city.lng);
+  // Match the original flow: request location without blocking map use.
+  window.setTimeout(()=>{if(!state.location)locate();},1400);
 }
 init();
