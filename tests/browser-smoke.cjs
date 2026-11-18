@@ -18,35 +18,33 @@ const fs = require('node:fs');
   await page.waitForSelector('#rate-current');
   await page.locator('#rate-current').click();
   await page.waitForSelector('#rate-dialog[open]');
+  await page.locator('#creep-input [data-creep="2"]').click();
+  await page.locator('#safety-stars [data-star="5"]').click();
+  await page.locator('#hygiene-stars [data-star="4"]').click();
+  await page.locator('#washroom-stars [data-star="3"]').click();
+  await page.locator('#vibe-input [data-choice="Welcoming"]').click();
+  await page.locator('#rate-comment').fill('Friendly staff, good lighting after sunset.');
+  const progressText = await page.locator('#review-progress-label').innerText();
+  if (!progressText.includes('4 of 4')) throw Error('Rating completion progress missing: '+progressText);
   await page.locator('#rate-form').evaluate(form => form.requestSubmit());
   await page.locator('#rate-dialog').waitFor({ state: 'hidden' });
   const localReview = await page.evaluate(() => localStorage.getItem('naari-map-reviews-2026-11-18'));
-  if (!localReview || localReview==='{}') throw Error('Rating did not persist locally');
+  if (!localReview || !localReview.includes('Friendly staff')) throw Error('Detailed rating did not persist locally');
+  if (!(await page.locator('#sheet-content').innerText()).includes('Friendly staff')) throw Error('My review not visible in place detail');
+  await page.locator('#rate-current').click();
+  if (!(await page.locator('#rate-comment').inputValue()).includes('Friendly staff')) throw Error('Review edit did not load previous input');
+  await page.locator('#safety-stars [data-star="2"]').click();
+  await page.locator('#rate-form').evaluate(form => form.requestSubmit());
+  await page.locator('#rate-dialog').waitFor({ state: 'hidden' });
   await page.screenshot({ path: 'artifacts/naari-detail.png', fullPage: true });
   await page.locator('.bottom-tabs [data-tab="profile"]').click();
-  if (!(await page.locator('#my-ratings').innerText()).includes('Safety')) throw Error('My ratings not populated');
+  if (!(await page.locator('#my-ratings').innerText()).includes('Safety 2/5')) throw Error('Edited rating not reflected in My Ratings');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('.bottom-tabs [data-tab="profile"]').click();
+  if (!(await page.locator('#my-ratings').innerText()).includes('Safety 2/5')) throw Error('Edited rating was not saved across reload');
+  await page.locator('.bottom-tabs [data-tab="inbox"]').click();
+  if (await page.locator('a[href*="naari-divyangmittal2027"], a[href*="solo-shield"]').count()) throw Error('Hackathon app links to pre-existing app');
   await page.screenshot({ path: 'artifacts/naari-profile.png', fullPage: true });
-  // Original Naari is inspected as a design reference only: never import its code.
-  const reference = await browser.newPage({ viewport:{ width:390, height:844 } });
-  for (const url of [
-    'https://naari-divyangmittal2027-7248.vercel.app/',
-    'https://solo-shield-1.emergent.host/'
-  ]) {
-    try {
-      await reference.goto(url, { waitUntil:'domcontentloaded', timeout:12000 });
-      await reference.waitForTimeout(1200);
-      await reference.screenshot({ path:'artifacts/naari-original-reference.png', fullPage:true });
-      console.log('Captured original Naari UI for comparison:',url);
-      break;
-    } catch (error) { console.log('Original reference unavailable at:',url,String(error).slice(0,120)); }
-  }
-  await reference.setViewportSize({ width:1280, height:800 });
-  try {
-    await reference.reload({ waitUntil:'domcontentloaded',timeout:12000 });
-    await reference.waitForTimeout(900);
-    await reference.screenshot({ path:'artifacts/naari-original-desktop.png' });
-  } catch (err) { console.log('Desktop reference screenshot unavailable:',String(err).slice(0,100)); }
-  await reference.close();
   const desktop=await browser.newPage({ viewport:{ width:1280,height:800 } });
   await desktop.goto('http://127.0.0.1:8080/',{waitUntil:'domcontentloaded'});
   await desktop.waitForSelector('#sheet-content .sheet-heading');
