@@ -15,7 +15,9 @@ const CITIES = [
   { id:'delhi', name:'Delhi', lat:28.6139, lng:77.2090, zoom:12 },
   { id:'gurugram', name:'Gurugram', lat:28.4595, lng:77.0266, zoom:12 },
   { id:'noida', name:'Noida', lat:28.5355, lng:77.3910, zoom:12 },
-  { id:'ghaziabad', name:'Ghaziabad', lat:28.6692, lng:77.4538, zoom:12 }
+  { id:'greater-noida', name:'Greater Noida', lat:28.4744, lng:77.5040, zoom:12 },
+  { id:'ghaziabad', name:'Ghaziabad', lat:28.6692, lng:77.4538, zoom:12 },
+  { id:'faridabad', name:'Faridabad', lat:28.4089, lng:77.3178, zoom:12 }
 ];
 const VIBES = ['Welcoming','Intrusive','Indifferent','Male-Dominated'];
 const TAGS = ['Main character energy','peaceful','soft-girl approved',"girls' night coded",'overhyped','weird vibes','red flag'];
