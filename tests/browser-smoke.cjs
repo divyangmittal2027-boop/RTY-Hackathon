@@ -40,7 +40,18 @@ const fs = require('node:fs');
       break;
     } catch (error) { console.log('Original reference unavailable at:',url,String(error).slice(0,120)); }
   }
+  await reference.setViewportSize({ width:1280, height:800 });
+  try {
+    await reference.reload({ waitUntil:'domcontentloaded',timeout:12000 });
+    await reference.waitForTimeout(900);
+    await reference.screenshot({ path:'artifacts/naari-original-desktop.png' });
+  } catch (err) { console.log('Desktop reference screenshot unavailable:',String(err).slice(0,100)); }
   await reference.close();
+  const desktop=await browser.newPage({ viewport:{ width:1280,height:800 } });
+  await desktop.goto('http://127.0.0.1:8080/',{waitUntil:'domcontentloaded'});
+  await desktop.waitForSelector('#sheet-content .sheet-heading');
+  await desktop.screenshot({ path:'artifacts/naari-new-desktop.png' });
+  await desktop.close();
   if (browserErrors.length) throw Error('Browser runtime errors: '+browserErrors.join('; '));
   await browser.close();
   console.log('Naari E2E PASS: map, city switch, detail, rating persistence, profile');
