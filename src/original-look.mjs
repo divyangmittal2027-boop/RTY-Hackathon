@@ -61,6 +61,18 @@ function persist() {
 function icon(category) {
   return {cafe:'coffee',restaurant:'utensils',landmark:'map-pin',help:'shield-plus'}[category]||'map-pin';
 }
+function pinTypeFor(value='') {
+  const v=String(value).toLowerCase();
+  if(v.includes('cafe')||v.includes('coffee')||v.includes('bakery'))return 'cafe';
+  if(v.includes('restaurant')||v.includes('fast_food')||v.includes('food_court'))return 'restaurant';
+  if(v.includes('pharmacy'))return 'pharmacy';
+  if(v.includes('clinic')||v.includes('doctors'))return 'clinic';
+  if(v.includes('hospital'))return 'hospital';
+  if(v.includes('police'))return 'police';
+  if(v.includes('embassy')||v.includes('diplomatic'))return 'embassy';
+  if(v.includes('health')||v.includes('help'))return 'other-help';
+  return 'attraction';
+}
 function categoryFor(value='') {
   const s=String(value).toLowerCase();
   if(/pharmacy|hospital|police|clinic|doctor|health|fire_station/.test(s))return 'help';
@@ -73,7 +85,7 @@ const samples=DEMO_PLACES.map((p)=>{
   if(p.category==='Café')category='cafe';
   if(p.category==='Pharmacy')category='help';
   if(p.category==='Community'||p.category==='Transit')category='landmark';
-  return {...p,category, isDemo:true, address:p.area};
+  return {...p,category,pinType:pinTypeFor(p.category==='Community'?'attraction':p.category),isDemo:true,address:p.area};
 });
 function allPlaces(){return [...samples,...state.external];}
 function reviewsFor(place) {
@@ -144,10 +156,10 @@ function selectCity(id){
 }
 function markerFor(place, selected){
   if(!window.L)return null;
-  const r=rating(place);
-  const style=r.color==='green'?'':r.color;
-  const markup=`<div class="naari-pin ${style} category-${place.category} ${place.category==='help'?'help':''} ${selected?'active':''}">${r.score??'⌖'}</div>`;
-  return window.L.divIcon({className:'',html:markup,iconSize:[38,40],iconAnchor:[19,19]});
+  const kind=place.pinType||pinTypeFor(place.category);
+  // Place category determines the marker colour; safety scoring is separate.
+  const markup=`<div class="type-pin type-${kind} ${selected?'active':''}" aria-hidden="true"></div>`;
+  return window.L.divIcon({className:'',html:markup,iconSize:[20,20],iconAnchor:[10,10]});
 }
 function renderPins(){
   if(!state.map||!window.L)return;
@@ -182,14 +194,25 @@ function renderSheet(){
   const list=filtered();
   sheet.innerHTML=`
     <div class="sheet-heading">
-      <div><h2>${state.location?'Near you':esc(state.city.name)}</h2><p>${list.length} places · ${state.external.length} public-directory listings</p></div>
+      <div><h2>${state.location?'Near you':esc(state.city.name)}</h2><p>${list.length} directory / demo listings · live results when available</p></div>
       <span>${state.period==='day'?'☀':'☾'}</span>
     </div>
     <div class="place-loc">⌖ ${state.location?'Your approximate location':esc(state.city.name)} · ${state.location?'Nearby results':'Allow location to see places near you'}</div>
-    <p class="sheet-explain">Explore restaurants, cafés, attractions and nearby help · Directory listings are not safety endorsements.</p>
+    <p class="sheet-explain">Pin colours show place types. Safety ratings are shown separately.</p>
     <div class="filter-row">${FILTERS.map(f=>`<button class="filter-pill ${state.filter===f.id?'selected':''}" data-filter="${f.id}">${f.label}</button>`).join('')}</div>
     ${state.loading?'<p class="data-notice">Finding nearby public places from OpenStreetMap…</p>':''}
     <p class="data-notice">Sample ratings are for illustration only. Public listings with grey pins have no community safety assessment.</p>
+    <div class="map-legend">
+      <span><i class="legend-dot type-cafe"></i>Café</span>
+      <span><i class="legend-dot type-restaurant"></i>Restaurant</span>
+      <span><i class="legend-dot type-attraction"></i>Attraction</span>
+      <span><i class="legend-dot type-pharmacy"></i>Pharmacy</span>
+      <span><i class="legend-dot type-clinic"></i>Clinic</span>
+      <span><i class="legend-dot type-hospital"></i>Hospital</span>
+      <span><i class="legend-dot type-police"></i>Police</span>
+      <span><i class="legend-dot type-embassy"></i>Embassy</span>
+      <span><i class="legend-dot type-other-help"></i>Other help</span>
+    </div>
     <div id="list-places">
     ${list.length?list.slice(0,70).map(p=>{
       const r=rating(p);
@@ -287,7 +310,7 @@ async function searchPublicPlace(q){
     const found=rows.map(x=>({
       id:'n-'+x.place_id, name:x.name||x.display_name.split(',')[0],
       address:x.display_name.slice(0,180),category:categoryFor(x.type||x.class),
-      lat:Number(x.lat),lng:Number(x.lon),isDemo:false,source:'OpenStreetMap'
+      lat:Number(x.lat),lng:Number(x.lon),pinType:pinTypeFor(x.type||x.class),isDemo:false,source:'OpenStreetMap'
     }));
     const seen=new Set(state.external.map(x=>x.id));state.external.push(...found.filter(x=>!seen.has(x.id)));
     state.query='';$('#map-search').value='';
@@ -305,7 +328,7 @@ async function fetchNearby(lat,lng){
     const places=(json.elements||[]).map(x=>{
       const lat=x.lat??x.center?.lat,lng=x.lon??x.center?.lon,name=x.tags?.name;
       if(!name||!Number.isFinite(lat)||!Number.isFinite(lng))return null;
-      return {id:'osm-'+x.type+'-'+x.id,name,address:x.tags?.['addr:street']||x.tags?.['addr:city']||'Public OpenStreetMap listing',category:categoryFor(x.tags?.amenity),lat,lng,isDemo:false,source:'OpenStreetMap'};
+      return {id:'osm-'+x.type+'-'+x.id,name,address:x.tags?.['addr:street']||x.tags?.['addr:city']||'Public OpenStreetMap listing',category:categoryFor(x.tags?.amenity||x.tags?.tourism||x.tags?.office),pinType:pinTypeFor(x.tags?.amenity||x.tags?.tourism||x.tags?.office),lat,lng,isDemo:false,source:'OpenStreetMap'};
     }).filter(Boolean).slice(0,45);
     const seen=new Set([...samples,...state.external].map(p=>p.id));
     state.external=[...state.external,...places.filter(p=>!seen.has(p.id))].slice(-100);
