@@ -146,7 +146,7 @@ function markerFor(place, selected){
   if(!window.L)return null;
   const r=rating(place);
   const style=r.color==='green'?'':r.color;
-  const markup=`<div class="naari-pin ${style} ${place.category==='help'?'help':''} ${selected?'active':''}">${r.score??'⌖'}</div>`;
+  const markup=`<div class="naari-pin ${style} category-${place.category} ${place.category==='help'?'help':''} ${selected?'active':''}">${r.score??'⌖'}</div>`;
   return window.L.divIcon({className:'',html:markup,iconSize:[38,40],iconAnchor:[19,19]});
 }
 function renderPins(){
@@ -443,7 +443,24 @@ function init(){
     state.safetyMode=true;state.routeMode=false;state.selected=null;
     state.expanded=true;$('#places-sheet').classList.add('expanded');renderSheet();
   };
-  $('#toggle-sheet').onclick=()=>{
+  const handle=$('#toggle-sheet');
+  let pointerStart=null, justDragged=false;
+  handle.addEventListener('pointerdown',(event)=>{
+    pointerStart=event.clientY;
+    try{handle.setPointerCapture(event.pointerId);}catch{}
+  });
+  handle.addEventListener('pointerup',(event)=>{
+    if(pointerStart===null)return;
+    const delta=event.clientY-pointerStart;
+    pointerStart=null;
+    if(Math.abs(delta)>25){
+      justDragged=true;
+      state.expanded=delta<0;
+      $('#places-sheet').classList.toggle('expanded',state.expanded);
+    }
+  });
+  handle.onclick=()=>{
+    if(justDragged){justDragged=false;return;}
     state.expanded=!state.expanded;
     $('#places-sheet').classList.toggle('expanded',state.expanded);
   };
