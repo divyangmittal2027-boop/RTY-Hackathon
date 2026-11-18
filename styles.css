@@ -373,3 +373,47 @@
 .creep-caption,.star-caption{transition:color .15s ease}
 .rate-dialog .rating-preview{background:#f8eaf3;border-color:#f4c9df}
 .rate-dialog .preview-sparkle{color:#ba4085}
+
+/* Day-to-night visual preview. Does not imply verified time-specific safety data. */
+.night-mode{--surface:#201d2e;--panel:#2d2940;--ink:#f8f2fd;--secondary:#ede2f6;--muted:#bcb0ca;--border:#4d405d;color:var(--ink)}
+.night-mode .application{background:#1c1b2e}
+.night-mode .map-page{background:#181c35}
+.night-mode #safety-map{background:#1c2940;filter:brightness(.52) contrast(1.16) saturate(.82) hue-rotate(14deg);transition:filter .4s ease}
+.night-mode .places-sheet{background:#211e31!important;box-shadow:0 -9px 48px #100e22a8;border-top:1px solid #5c496f}
+.night-mode .sheet-heading h2,.night-mode .place-description strong,.night-mode .place-loc{color:#fcf5ff}
+.night-mode .sheet-heading p,.night-mode .sheet-explain,.night-mode .data-notice,.night-mode #directory-status,.night-mode .place-description small{color:#c7b9d4}
+.night-mode .glass,.night-mode .map-search,.night-mode .city-chip{background:#29243bdb;color:#fdf4ff;border-color:#61536d}
+.night-mode .map-search input{color:#fff}
+.night-mode .map-search input::placeholder{color:#d0bfdb}
+.night-mode .city-chip.active,.night-mode .period-item.selected{background:#7d4bd1;color:#fff;border-color:#ac85f9}
+.night-mode .filter-pill{background:#332a43;color:#f6eafd;border-color:#554266}
+.night-mode .filter-pill.selected{background:#5e3a83;color:#fff;border-color:#c17cfd}
+.night-mode .place-row,.night-mode .rateable-row{border-color:#4c405d}
+.night-mode .place-row-main{color:#fdf3ff}
+.night-mode .place-row-main:hover,.night-mode .place-row:hover{background:#3a2e4c}
+.night-mode .score-disc.unknown{background:#5b6072}
+.night-mode .map-legend span{color:#d7c6dd}
+.night-mode .row-rate-button,.night-mode .quick-rate{background:#442654;color:#ffdbf4;border-color:#d66abd}
+.night-mode .add-personal-place{background:#442851;color:#fff0fb;border-color:#d77fbd}
+.night-mode .bottom-tabs{background:#211c32;border-top-color:#5e4f6d}
+.night-mode .tab{color:#bdaec8}
+.night-mode .tab.active{color:#ffafdf}
+.night-mode .period-switch{background:#28263bcf}
+.night-mode .period-item:not(.selected){color:#d4cce0}
+.night-mode .detail-title,.night-mode .detail-section h3{color:#fff2ff}
+.night-mode .detail-score-row,.night-mode .metric{background:#332b46;border-color:#5b4a70}
+.night-mode .detail-score-row p,.night-mode .metric span{color:#f4e9fa}
+.night-mode .detail-subtitle{color:#c4b5cc}
+.night-mode .outline-button{background:#352a44;color:#f4dcfd;border-color:#876ba1}
+.night-mode .secondary-page{background:#211d30}
+.night-mode .profile-hero,.night-mode .profile-edit-form,.night-mode .journal-form{background:#312739;border-color:#5d4569}
+.night-mode .profile-edit-form input,.night-mode .profile-edit-form textarea{background:#281f34;color:#fff;border-color:#684f74}
+.night-mode .profile-section h3{color:#f5deff}
+.night-mode .setting-row b{color:#f6eafb}
+.night-mode .rate-dialog{background:#211d30;color:#fff}
+.night-mode .review-introduction,.night-mode .rating-preview{background:#362745;border-color:#6a477e}
+.night-mode .review-introduction h3,.night-mode .rating-preview b{color:#fff}
+.night-mode .rate-dialog .rate-label,.night-mode .rate-dialog .rate-help,.night-mode .rate-dialog .star-caption,.night-mode .rate-dialog .creep-caption{color:#f4e8fa}
+.night-mode .rate-dialog textarea{background:#30263e;color:#fff}
+.night-mode .rate-dialog .choice-chip{background:#332840;color:#e9d7f1}
+.night-mode .rate-dialog .choice-chip.selected{background:#713d84;color:white}
