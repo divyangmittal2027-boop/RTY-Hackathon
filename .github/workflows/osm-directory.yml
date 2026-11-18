@@ -1,0 +1,34 @@
+name: Capture public OpenStreetMap directory
+
+on:
+  push:
+    paths:
+      - 'scripts/collect-public-places.mjs'
+      - '.github/workflows/osm-directory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch fresh public listings
+        run: node scripts/collect-public-places.mjs
+      - name: Commit public data if available
+        run: |
+          if [ ! -f src/public-places.json ]; then
+            echo "No public data received; retaining existing app fallbacks."
+            exit 0
+          fi
+          git config user.name "Naari Buildathon Data"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/public-places.json
+          git commit -m "data: capture public OSM directory for offline fallback" || exit 0
+          git push origin HEAD:main
