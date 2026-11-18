@@ -44,3 +44,81 @@
   .places-sheet.expanded{height:86%}
   .floating-actions{right:16px;bottom:calc(34% + 20px)}
 }
+
+/* Standalone private journal */
+.journal-layout{max-width:730px;margin:23px auto}
+.journal-intro{display:flex;gap:17px;align-items:center;border:1px solid var(--border);border-radius:18px;padding:21px;background:#fff;margin-bottom:18px}
+.journal-icon{flex:0 0 58px;width:58px;height:58px;border-radius:18px;background:var(--sage-soft);display:grid;place-items:center;color:#627b62}
+.journal-icon svg{height:26px;width:26px}
+.journal-intro h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:28px;margin:0 0 5px}
+.journal-intro p{font-size:12px;color:var(--muted);line-height:1.6;margin:0}
+.journal-form{border:1px solid var(--border);border-radius:17px;padding:20px;background:#fff}
+.journal-form label{font-weight:800;display:block;font-size:13px;margin-bottom:10px}
+.journal-form textarea{resize:vertical;width:100%;min-height:115px;border-radius:12px;border:1px solid var(--border);padding:14px;background:var(--surface);font-size:13px;line-height:1.6}
+.journal-form textarea:focus{outline:2px solid var(--sage);outline-offset:1px}
+.journal-form-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.journal-form-bottom span{color:var(--muted);font-size:11px}
+.journal-form-bottom .solid-button svg{height:15px;width:15px}
+.journal-list-head{display:flex;align-items:center;justify-content:space-between;margin-top:27px}
+.journal-list-head h3{font:700 25px "Cormorant Garamond",Georgia,serif;margin:0}
+.journal-list-head span{font-size:12px;color:var(--muted)}
+.journal-empty{padding:38px 20px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px;margin-top:13px}
+.journal-empty svg{width:25px;height:25px;display:block;margin:0 auto 10px;color:var(--sage)}
+.journal-empty b{font-size:14px;color:var(--ink)}
+.journal-empty p{font-size:12px;line-height:1.5}
+.journal-note{padding:16px 19px;margin-top:11px;border:1px solid var(--border);border-radius:14px;background:#fff}
+.journal-note-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.journal-note-head span{color:#728a6f;font-size:11px}
+.journal-note-head button{border:none;background:transparent;display:flex;align-items:center;gap:4px;color:#a0645c;font-size:11px}
+.journal-note-head svg{width:13px;height:13px}
+.journal-note p{font-size:13px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;margin:11px 0 0}
+.journal-footnote{color:var(--muted);font-size:11px;line-height:1.6;text-align:center;margin:20px 0}
+/* Guided review with fully filled, interactive stars, clear progress and preview */
+.review-introduction{border-radius:15px;background:linear-gradient(130deg,#e5ece1,#f8f4eb);padding:17px;margin:4px 0 22px}
+.review-eyebrow{letter-spacing:1.3px;color:#587252;font-weight:800;font-size:10px}
+.review-introduction h3{font:700 27px/1.1 "Cormorant Garamond",Georgia,serif;margin:7px 0}
+.review-introduction p{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 19px}
+.review-progress-heading{display:flex;justify-content:space-between;align-items:center;color:#506e4d;font-size:11px;font-weight:800;margin:0 0 7px}
+.review-progress-track{height:7px;border-radius:20px;background:#c8d5c3;overflow:hidden}
+.review-progress-fill{height:100%;width:0;background:#718e6b;border-radius:20px;transition:width .16s ease}
+.optional-hint{float:right;color:#889580;font-weight:500;font-size:11px}
+.rate-dialog .rate-label{margin-top:21px}
+.rate-dialog .stars-group{gap:11px}
+.rate-dialog .star-choice{font-size:34px;line-height:1.2;color:#dbd9d3;transition:transform .12s,color .12s}
+.rate-dialog .star-choice.selected{color:#E5A340;text-shadow:0 1px 0 #c38b32}
+.rate-dialog .star-choice:hover,.rate-dialog .creep-button:hover{transform:scale(1.12)}
+.rate-dialog .creep-button{min-height:30px}
+.rate-dialog .creep-button.selected{background:#869981}
+.rate-dialog .star-caption,.rate-dialog .creep-caption{font-size:11px;color:#5c7559;margin:5px 0 0;font-weight:700}
+.rate-dialog .choice-chip.selected{background:#d8e6d4;border-color:#91aa89;box-shadow:inset 0 0 0 1px #91aa89}
+.rating-preview{display:flex;align-items:center;gap:11px;margin:23px 0 2px;padding:15px;background:#e8eee4;border:1px solid #ccd7c9;border-radius:14px}
+.preview-sparkle{font-size:25px;color:#72936d;align-self:flex-start}
+.rating-preview>div:nth-child(2){flex:1;min-width:0}
+.rating-preview b{font-size:12px}
+.rating-preview p{color:#4d6151;font-size:11px;margin:6px 0 0;line-height:1.6}
+.rating-preview small{font-size:10px;line-height:1.5;color:#697d68;display:block;margin-top:4px}
+.preview-score{font-weight:800;color:#526f50;font-size:26px;white-space:nowrap}
+.preview-score small{display:inline;font-size:10px}
+.rate-dialog .submit-review:disabled{background:#b6c3b1;color:#f6f8f3;cursor:not-allowed}
+.rate-dialog .rating-scroll{max-height:60dvh}
+.saved-review-comment{font-size:12px;color:var(--secondary);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin:9px 0 0}
+.profile-review-actions{display:flex;gap:6px;flex-direction:column}
+.profile-review-actions button{font-size:11px;padding:7px 10px;border:1px solid var(--sage);background:var(--surface);color:#5e7c55;border-radius:7px;font-weight:700}
+.profile-review-actions .delete-review{color:#a1524b;border-color:#e8cbc5}
+.my-review-box{border:1px solid #cdddc7;background:#f1f7ef;border-radius:13px;margin:17px 0;padding:15px}
+.my-review-box>strong{display:block;color:#54704f;font-size:13px}
+.my-review-box>p{font-size:12px;color:var(--secondary);line-height:1.6;margin:8px 0}
+.my-review-box small{font-size:11px;color:#60785c}
+.my-review-box .tag-preview{margin:9px 0}
+.tag-preview{display:flex;flex-wrap:wrap;gap:6px}
+.tag-preview span{font-size:10px;background:#dfe9da;border:1px solid #c7d7c2;color:#4e6749;padding:5px 8px;border-radius:30px}
+@media(max-width:520px){
+  .journal-intro{padding:15px}
+  .journal-icon{width:48px;height:48px;flex-basis:48px}
+  .journal-form{padding:15px}
+  .journal-form-bottom{align-items:flex-start;flex-direction:column}
+  .journal-form-bottom .solid-button{align-self:flex-end}
+  .review-introduction{padding:14px}
+  .rate-dialog .star-choice{font-size:30px}
+  .rate-dialog .creep-button{min-height:27px;font-size:10px}
+}
