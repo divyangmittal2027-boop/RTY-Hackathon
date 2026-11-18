@@ -233,7 +233,7 @@ function renderSheet(){
     </div>`;
   sheet.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{state.filter=btn.dataset.filter;renderSheet();renderPins();});
   $('#add-personal-place').onclick=openAddPlace;
-  $('#scan-nearby').onclick=()=>{const center=state.map?.getCenter();fetchNearby(center?.lat??state.city.lat,center?.lng??state.city.lng);};
+  $('#scan-nearby').onclick=scanVisibleArea;
   sheet.querySelectorAll('[data-place]').forEach(btn=>btn.onclick=()=>openPlace(btn.dataset.place));
   refreshIcons();
 }
@@ -382,6 +382,13 @@ async function fetchNearby(lat,lng){
       renderPins();
     }
   }
+}
+function scanVisibleArea(){
+  const center=state.map?.getCenter();
+  state.selected=null;state.filter='all';state.safetyMode=false;state.routeMode=false;
+  state.expanded=true;$('#places-sheet').classList.add('expanded');
+  fetchNearby(center?.lat??state.city.lat,center?.lng??state.city.lng);
+  notify('Scanning cafés, restaurants and essentials in this map area…');
 }
 function locate(){
   if(!navigator.geolocation){setMessage('Location unavailable in this browser. Choose a city.');return;}
@@ -704,6 +711,7 @@ function init(){
     state.expanded=true;$('#places-sheet').classList.add('expanded');
     renderSheet();renderPins();
   };
+  $('#quick-scan').onclick=scanVisibleArea;
   $('#locate-me').onclick=locate;
   $('#open-routes').onclick=()=>{
     state.routeMode=true;state.safetyMode=false;state.selected=null;
