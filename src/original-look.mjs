@@ -35,7 +35,7 @@ const state = {
   city:CITIES[0], period:'day', filter:'all', query:'', selected:null,
   map:null, pins:new Map(), location:null, locationMarker:null, expanded:false,
   routeMode:false, safetyMode:false, external:loadKnownPlaces(), loading:false, directoryText:'Find places near you · OpenStreetMap directory',
-  reviews:loadSaved(), draft:null, searchTimer:null
+  reviews:loadSaved(), draft:null, ratingReturn:null, searchTimer:null
 };
 
 function loadSaved() {
@@ -224,17 +224,21 @@ function renderSheet(){
     <div id="list-places">
     ${list.length?list.slice(0,70).map(p=>{
       const r=rating(p);
-      return `<button class="place-row" data-place="${esc(p.id)}">
+      return `<div class="place-row rateable-row"><button type="button" class="place-row-main" data-place="${esc(p.id)}">
         <span class="place-icon ${p.category}"><i data-lucide="${icon(p.category)}"></i></span>
         <span class="place-description"><strong>${esc(p.name)}</strong><small>${p.isDemo?'Sample demo ratings · ':p.source==='Personal place'?'Personal place · ':'Public listing · '}${esc(p.address||p.category)}${r.count?' · Creep '+r.creep+'/10':''}</small></span>
         <span class="score-disc ${r.color}">${r.score??'–'}</span>
-      </button>`;
+      </button><button type="button" class="row-rate-button" data-rate-id="${esc(p.id)}" aria-label="Rate ${esc(p.name)}">★ Rate</button></div>`;
     }).join(''):'<div class="empty-list">No nearby places found. Try another category or city, or search for a specific place.</div>'}
     </div>`;
   sheet.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{state.filter=btn.dataset.filter;renderSheet();renderPins();});
   $('#add-personal-place').onclick=openAddPlace;
   $('#scan-nearby').onclick=scanVisibleArea;
   sheet.querySelectorAll('[data-place]').forEach(btn=>btn.onclick=()=>openPlace(btn.dataset.place));
+  sheet.querySelectorAll('[data-rate-id]').forEach(btn=>btn.onclick=()=>{
+    const place=allPlaces().find(p=>p.id===btn.dataset.rateId);
+    if(place){openPlace(place.id);openRate(place);}
+  });
   refreshIcons();
 }
 function openPlace(id){
@@ -244,6 +248,14 @@ function openPlace(id){
   renderSheet();renderPins();
   $('#sheet-content').scrollTop=0;
   if(state.map)state.map.flyTo([p.lat,p.lng],Math.max(13,state.map.getZoom()),{duration:.5});
+}
+function showRatingPicker(){
+  state.selected=null;state.routeMode=false;state.safetyMode=false;
+  state.filter='all';state.query='';$('#map-search').value='';
+  $('#search-suggestions').hidden=true;$('#clear-search').hidden=true;
+  state.expanded=true;$('#places-sheet').classList.add('expanded');
+  renderSheet();renderPins();$('#sheet-content').scrollTop=0;
+  notify('Choose a place and tap ★ Rate, or add a missing place.');
 }
 function backToPlaces(){
   state.selected=null;state.routeMode=false;state.safetyMode=false;
@@ -567,7 +579,7 @@ function renderProfile(){
   }).join(''):'<p class="data-notice">You haven’t rated any places on this device yet. Open a place from the Map tab to share your experience.</p>';
   $$('#my-ratings [data-edit]').forEach(b=>b.onclick=()=>{
     const p=allPlaces().find(x=>x.id===b.dataset.edit);
-    if(p){switchTab('map');openPlace(p.id);openRate(p);}
+    if(p){switchTab('map');openPlace(p.id);openRate(p,'profile');}
     else notify('This public listing is not currently available in the demo. Your rating remains saved.');
   });
   $$('#my-ratings [data-delete-review]').forEach(b=>b.onclick=()=>{
@@ -611,7 +623,8 @@ function savePersonalPlace(event){
   openRate(place);
   notify('Personal place added. Rate it to save your experience.');
 }
-function openRate(place){
+function openRate(place, returnTo=null){
+  state.ratingReturn=returnTo;
   state.selected=place;
   const prev=state.reviews[place.id]||{};
   state.draft={
@@ -718,6 +731,7 @@ function init(){
     renderSheet();renderPins();
   };
   $('#quick-scan').onclick=scanVisibleArea;
+  $('#quick-rate').onclick=showRatingPicker;
   $('#locate-me').onclick=locate;
   $('#open-routes').onclick=()=>{
     state.routeMode=true;state.safetyMode=false;state.selected=null;
@@ -750,6 +764,10 @@ function init(){
   };
   $('#rate-form').addEventListener('submit',saveRate);
   $('#rate-close').onclick=()=>$('#rate-dialog').close();
+  $('#rate-dialog').addEventListener('close',()=>{
+    const returnTo=state.ratingReturn;state.ratingReturn=null;
+    if(returnTo==='profile'){backToPlaces();switchTab('profile');}
+  });
   $('#rate-dialog').addEventListener('click',e=>{if(e.target===$('#rate-dialog'))$('#rate-dialog').close();});
   const hash=(location.hash||'').replace('#','');
   if(['cities','inbox','profile'].includes(hash))switchTab(hash);
