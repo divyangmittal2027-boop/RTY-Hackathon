@@ -118,11 +118,30 @@ See [RULES.md](RULES.md) for the full list.
 
 ## Your project
 
-_Replace this section with your project README:_
-- **Team:**
-- **Track:**
-- **Problem:** who faces it and why it happens
-- **What we built:** the core workflow
-- **The hardest part:** how we solved it
-- **How to run it:**
-- **Demo / screenshots:**
+### Naari — Know before you go
+
+- **Team:** Naari
+- **Track:** Build for the Physical World (`physical-world`)
+- **Problem:** Many women rely on scattered word of mouth to assess unfamiliar public spaces. A conventional star rating for food or service does not explain practical concerns such as lighting, staff behaviour, washrooms, or overall comfort.
+- **What we built:** A responsive Delhi NCR discovery prototype with interactive sample locations on a map, filtering and search, opt-in location sorting, four-factor ratings, editable reviews, and one-tap access to India's emergency number 112.
+- **The hardest part:** Making ratings explainable rather than compressing everything into an opaque label. Naari averages four clearly defined 1–5 observations, shows the individual factor breakdown and review count, and allows a user to revise their own assessment.
+- **How to run it:** Start a static web server in this repository: `python3 -m http.server 8080`, then open [http://localhost:8080](http://localhost:8080). Alternatively use `npx serve .`. A local web server is needed for JavaScript modules. The map needs internet access for Leaflet and OpenStreetMap tiles; discovery and reviews are still available if the map fails.
+- **Tests:** `node --test tests/*.test.mjs`; JavaScript syntax: `node --check src/app.mjs`.
+- **Tech:** HTML, CSS, JavaScript ES modules, Leaflet, OpenStreetMap tiles, browser geolocation, and localStorage.
+
+#### Demo walkthrough (about 90 seconds)
+
+1. Open Naari and explain the gap between ordinary star ratings and women's practical questions.
+2. Search for a sample neighbourhood, choose a category, and click a sample venue on the list or map.
+3. Show the overall score, factor breakdown, and sample rating count.
+4. Click **Share my rating**, give four ratings, save, and show the updated average.
+5. Click **Edit my rating** to demonstrate corrections and local persistence. Optionally use **Find places near me** to sort by distance.
+6. Show the **Emergency 112** calling link and the limitation disclosure.
+
+#### Important limitations
+
+**This is a hackathon prototype, not a safety certification or emergency dispatch product.** Every listing and initial rating is fictional demonstration data, with approximate Delhi NCR neighbourhood coordinates. User reviews are **only stored in the current browser on the current device**; they are not authenticated, moderated, or shared between users. There is no live Google rating, verified safe-space designation, or live crowd-sourced database. A high rating cannot guarantee a person's safety, and circumstances may change quickly.
+
+#### Buildathon provenance
+
+All Naari application code in this fork was newly written during the 18 Nov 2026 Buildathon. The team's earlier Naari project was used for **concept inspiration only**; none of its pre-existing application source was imported. See the fork's incremental Git history. AI tools were used for in-repo code creation, within the rules of the event.
