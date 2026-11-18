@@ -632,6 +632,7 @@ function openRate(place, returnTo=null){
     vibe:[...(prev.vibe||[])],tags:[...(prev.tags||[])],infra:[...(prev.infra||[])]
   };
   $('#rate-title').textContent=place.name;
+  $('#rate-back-profile').hidden=returnTo!=='profile';
   $('#rate-comment').value=prev.comment||'';
   drawRate();
   $('#rate-dialog').showModal();
@@ -640,7 +641,7 @@ function drawRate(){
   const d=state.draft;
   $('#creep-input').innerHTML=Array.from({length:10},(_,i)=>i+1).map(n=>`<button type="button" class="creep-button ${n<=d.creep?'selected':''}" data-creep="${n}" aria-label="Creep level ${n} of 10" aria-pressed="${n===d.creep}">${n}</button>`).join('');
   $$('#creep-input [data-creep]').forEach(b=>b.onclick=()=>{d.creep=Number(b.dataset.creep);drawRate();});
-  $('#creep-caption').textContent=!d.creep?'Choose 1 if you felt at ease, 10 if you felt very unsafe':d.creep<=3?'Low concern · Felt at ease':d.creep<=6?'Some discomfort · Stay aware':'High concern · Felt unsafe';
+  $('#creep-caption').textContent=!d.creep?'✨ Pick how the place felt — 1 is relaxed, 10 is high concern':d.creep<=3?'😌 Low concern · Felt at ease':d.creep<=6?'😐 Some discomfort · Stay aware':'😟 High concern · Felt unsafe';
   const descriptions={
     safety:['','Very unsafe','Somewhat unsafe','Mixed feelings','Mostly comfortable','Very comfortable'],
     hygiene:['','Very poor','Poor','Fair','Good','Excellent'],
@@ -650,7 +651,7 @@ function drawRate(){
     const element=$('#'+key+'-stars');
     element.innerHTML=[1,2,3,4,5].map(n=>`<button type="button" class="star-choice ${n<=d[key]?'selected':''}" data-star="${n}" aria-label="${key} ${n} stars" aria-pressed="${d[key]===n}">★</button>`).join('');
     element.querySelectorAll('[data-star]').forEach(b=>b.onclick=()=>{d[key]=Number(b.dataset.star);drawRate();});
-    $('#'+key+'-caption').textContent=d[key]?`${d[key]} of 5 · ${descriptions[key][d[key]]}`:'Tap a star to rate this aspect';
+    $('#'+key+'-caption').textContent=d[key]?`⭐ ${d[key]} of 5 · ${descriptions[key][d[key]]}`:'✨ Tap a star to rate this aspect';
   }
   for(const [key,items] of [['vibe',VIBES],['tags',TAGS],['infra',INFRA]]){
     const element=$('#'+key+'-input');
@@ -777,6 +778,7 @@ function init(){
   };
   $('#rate-form').addEventListener('submit',saveRate);
   $('#rate-close').onclick=dismissRating;
+  $('#rate-back-profile').onclick=dismissRating;
   // Escape and outside-click also return to Profile when the rating originated there.
   $('#rate-dialog').addEventListener('close',returnFromRating);
   $('#rate-dialog').addEventListener('cancel',returnFromRating);
