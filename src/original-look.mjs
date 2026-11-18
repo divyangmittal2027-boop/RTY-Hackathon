@@ -529,6 +529,8 @@ function enterDemo(event){
   try{localStorage.setItem(DEMO_KEY,'yes');}catch{}
   $('#welcome-overlay').hidden=true;
   renderProfile();refreshIcons();
+  // Request location only after the visitor explicitly enters demo mode.
+  window.setTimeout(()=>{if(!state.location)locate();},600);
   if(state.map)requestAnimationFrame(()=>state.map.invalidateSize());
   notify('Welcome to Naari ✦ You are browsing in demo mode');
 }
@@ -741,6 +743,6 @@ function init(){
   // Places are fetched independently; slow public providers never hold the map hostage.
   fetchNearby(state.city.lat,state.city.lng);
   // Match the original flow: request location without blocking map use.
-  window.setTimeout(()=>{if(!state.location)locate();},1400);
+  window.setTimeout(()=>{if($('#welcome-overlay').hidden&&!state.location)locate();},1400);
 }
 init();
