@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeOverpass, fetchPublicPlaces } from '../src/places-provider.mjs';
+import { normalizeOverpass, fetchPublicPlaces, makeOverpassQuery } from '../src/places-provider.mjs';
 
 test('converts an OSM node into a public place without inventing ratings', () => {
   const rows = normalizeOverpass({
@@ -46,4 +46,14 @@ test('falls back to another Overpass endpoint after a failed request',async()=>{
 test('rejects non-finite coordinates to prevent invalid map pins',()=>{
   const rows=normalizeOverpass({elements:[{type:'node',id:2,lat:'no',lon:'longitude',tags:{name:'Bad Place'}}]});
   assert.equal(rows.length,0);
+});
+
+test('nearby scan includes cafes restaurants bakeries and food courts',()=>{
+  const query=makeOverpassQuery(28.6139,77.209);
+  assert.match(query,/cafe/);
+  assert.match(query,/restaurant/);
+  assert.match(query,/fast_food/);
+  assert.match(query,/food_court/);
+  assert.match(query,/bakery/);
+  assert.match(query,/around:3500/);
 });
