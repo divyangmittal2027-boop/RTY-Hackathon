@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeOverpass, fetchPublicPlaces, makeOverpassQuery } from '../src/places-provider.mjs';
+import { normalizeOverpass, fetchPublicPlaces, makeOverpassQuery, normalizePhoton } from '../src/places-provider.mjs';
 
 test('converts an OSM node into a public place without inventing ratings', () => {
   const rows = normalizeOverpass({
@@ -56,4 +56,16 @@ test('nearby scan includes cafes restaurants bakeries and food courts',()=>{
   assert.match(query,/food_court/);
   assert.match(query,/bakery/);
   assert.match(query,/around:3500/);
+});
+
+test('normalizes nearby Photon GeoJSON venues with no invented safety rating',()=>{
+  const places=normalizePhoton({features:[
+    {geometry:{coordinates:[77.22,28.63]},properties:{name:'Public Café',osm_id:20,osm_type:'N',osm_value:'cafe',street:'Demo Road',city:'New Delhi'}},
+    {geometry:{coordinates:[77.25,28.61]},properties:{name:'Public Restaurant',osm_id:21,osm_type:'W',osm_value:'restaurant',city:'New Delhi'}},
+  ]});
+  assert.equal(places.length,2);
+  assert.equal(places[0].amenity,'cafe');
+  assert.equal(places[1].name,'Public Restaurant');
+  assert.equal(places[0].lat,28.63);
+  assert.equal(Object.hasOwn(places[0],'score'),false);
 });
