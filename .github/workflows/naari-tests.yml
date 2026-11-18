@@ -1,0 +1,25 @@
+name: Naari app tests
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/safety.mjs
+          node --check src/places.mjs
+          node --check src/app.mjs
+      - name: Run safety scoring tests
+        run: node --test tests/*.test.mjs
