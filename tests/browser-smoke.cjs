@@ -5,6 +5,20 @@ const fs = require('node:fs');
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const browserErrors = [];
   page.on('pageerror', error => browserErrors.push(String(error)));
+  // Stub third-party directory providers so a real café/restaurant discovery
+  // can be verified deterministically even when public APIs are rate-limited.
+  await page.route(url => url.hostname.includes('overpass') && url.pathname.includes('/api/interpreter'),
+    route => route.fulfill({status:503,body:'Directory temporarily unavailable'}));
+  await page.route(url => url.hostname==='photon.komoot.io' && url.pathname==='/reverse',
+    route => {
+      const kind=new URL(route.request().url()).searchParams.get('osm_tag')?.split(':')[1]||'cafe';
+      const cafe=kind==='cafe';
+      const feature={type:'Feature',geometry:{type:'Point',coordinates:[cafe?77.218:77.221,cafe?28.631:28.632]},
+        properties:{name:cafe?'Test Public Café':'Test Public Restaurant',osm_type:'N',osm_id:cafe?9501:9502,osm_value:kind,city:'Delhi'}};
+      route.fulfill({status:200,contentType:'application/json',
+        body:JSON.stringify({type:'FeatureCollection',features:[feature]})});
+    });
+
   await page.goto('http://127.0.0.1:8080/', { waitUntil:'domcontentloaded', timeout:30000 });
   await page.locator('#welcome-overlay').waitFor({state:'visible'});
   await page.screenshot({path:'artifacts/naari-vibrant-welcome.png'});
@@ -14,6 +28,7 @@ const fs = require('node:fs');
   await page.waitForSelector('#sheet-content .sheet-heading', {timeout:20000});
   await page.waitForTimeout(8500);
   console.log('Live directory state:', await page.locator('#sheet-content .sheet-heading p').textContent());
+  if (!(await page.locator('#sheet-content').innerText()).includes('Test Public Café')) throw Error('Nearby Photon fallback café not discoverable');
   console.log('Map location message:', await page.locator('#location-message').textContent());
   await page.screenshot({ path: 'artifacts/naari-map.png', fullPage: true });
   if (!(await page.locator('#sheet-content').innerText()).includes('Delhi')) throw Error('Map panel missing Delhi');
