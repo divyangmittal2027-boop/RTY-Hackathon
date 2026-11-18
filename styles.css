@@ -366,3 +366,10 @@
  .row-rate-button{padding:9px 10px;font-size:10px}
  .place-row-main{gap:7px}
 }
+
+.rate-back-profile{border:0;background:#fff1f7;color:#a32c76;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:800;margin:0 0 13px;display:inline-flex;align-items:center;gap:7px}
+.rate-back-profile[hidden]{display:none!important}
+.rate-back-profile:hover{background:#fbd9e9}
+.creep-caption,.star-caption{transition:color .15s ease}
+.rate-dialog .rating-preview{background:#f8eaf3;border-color:#f4c9df}
+.rate-dialog .preview-sparkle{color:#ba4085}
