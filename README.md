@@ -118,30 +118,48 @@ See [RULES.md](RULES.md) for the full list.
 
 ## Your project
 
-### Naari — Know before you go
+### Naari — Your city, your sisterhood
 
-- **Team:** Naari
-- **Track:** Build for the Physical World (`physical-world`)
-- **Problem:** Many women rely on scattered word of mouth to assess unfamiliar public spaces. A conventional star rating for food or service does not explain practical concerns such as lighting, staff behaviour, washrooms, or overall comfort.
-- **What we built:** A responsive Delhi NCR discovery prototype with interactive sample locations on a map, filtering and search, opt-in location sorting, four-factor ratings, editable reviews, and one-tap access to India's emergency number 112.
-- **The hardest part:** Making ratings explainable rather than compressing everything into an opaque label. Naari averages four clearly defined 1–5 observations, shows the individual factor breakdown and review count, and allows a user to revise their own assessment.
-- **How to run it:** Start a static web server in this repository: `python3 -m http.server 8080`, then open [http://localhost:8080](http://localhost:8080). Alternatively use `npx serve .`. A local web server is needed for JavaScript modules. The map needs internet access for Leaflet and OpenStreetMap tiles; discovery and reviews are still available if the map fails.
-- **Tests:** `node --test tests/*.test.mjs`; JavaScript syntax: `node --check src/app.mjs`.
-- **Tech:** HTML, CSS, JavaScript ES modules, Leaflet, OpenStreetMap tiles, browser geolocation, and localStorage.
+**Team:** Naari · **Track:** Build for the Physical World (`physical-world`)
 
-#### Demo walkthrough (about 90 seconds)
+**Problem:** Ordinary review systems prioritize food, service, and ambiance, but rarely tell women whether a place has practical conditions that affect confidence and safety. People need to know more than an average star rating: staff behaviour, possible harassment, hygiene, and access to help matter.
 
-1. Open Naari and explain the gap between ordinary star ratings and women's practical questions.
-2. Search for a sample neighbourhood, choose a category, and click a sample venue on the list or map.
-3. Show the overall score, factor breakdown, and sample rating count.
-4. Click **Share my rating**, give four ratings, save, and show the updated average.
-5. Click **Edit my rating** to demonstrate corrections and local persistence. Optionally use **Find places near me** to sort by distance.
-6. Show the **Emergency 112** calling link and the limitation disclosure.
+**What we built during the hackathon:** A responsive, map-first web prototype following the Naari product concept. It has a full-screen OpenStreetMap, a city selector for Delhi NCR, public amenity discovery via Overpass (best-effort), place search via OpenStreetMap Nominatim, a movable places panel, daytime/nighttime navigation controls, a transparent score breakdown, community-style ratings, local edits, a "My ratings" view, and official emergency telephone links. The main map displays a place's score only when illustrative or local review data exists. Unrated public directory listings have grey markers.
 
-#### Important limitations
+**Hardest technical part:** Separating map availability from place-data availability. Map tiles, location permission, public listing APIs, and ratings can fail independently. The interface is designed to show an initial map and fallback places even if one external provider fails, and to avoid presenting public directory listings as verified safe places. It never fabricates live community ratings for public listings.
 
-**This is a hackathon prototype, not a safety certification or emergency dispatch product.** Every listing and initial rating is fictional demonstration data, with approximate Delhi NCR neighbourhood coordinates. User reviews are **only stored in the current browser on the current device**; they are not authenticated, moderated, or shared between users. There is no live Google rating, verified safe-space designation, or live crowd-sourced database. A high rating cannot guarantee a person's safety, and circumstances may change quickly.
+**Run locally:**
 
-#### Buildathon provenance
+```bash
+python3 -m http.server 8080
+# Open http://localhost:8080
+```
 
-All Naari application code in this fork was newly written during the 18 Nov 2026 Buildathon. The team's earlier Naari project was used for **concept inspiration only**; none of its pre-existing application source was imported. See the fork's incremental Git history. AI tools were used for in-repo code creation, within the rules of the event.
+The site is vanilla HTML/CSS/JavaScript using ES modules and Leaflet. No frontend build step or API secrets are required.
+
+**Test commands:**
+
+```bash
+node --check src/original-look.mjs
+node --test tests/*.test.mjs
+```
+
+The fork also includes a browser walkthrough GitHub Action that exercises city switching, place details, local rating submission, and the profile's "My ratings" page. Screenshots from successful runs appear as workflow artifacts.
+
+**Demo workflow (90 seconds):**
+
+1. Open the map, choose a Delhi NCR city, search or tap a public/sample place.
+2. Expand the panel to show place details and a clearly labelled sample score breakdown.
+3. Submit a Creep Level, Safety, Hygiene, and Washroom rating; add vibe tags and save.
+4. Return to the place and edit the rating. Open Profile → My ratings to show the locally saved review.
+5. Try the locate button and the emergency help panel. Demonstrate that unrated public places have no Naari safety certification.
+
+**Prototype limitations and safety disclosure:**
+
+- **Not a safety certification.** A green score from fictional or user-entered reviews cannot guarantee personal safety; circumstances change. Do not use this prototype as the sole basis for safety-critical decisions.
+- **All preset sample venues, initial community-style ratings and scores are fictional demo material**, not real Naari reports. Public OpenStreetMap directory listings, when available, are not verified by Naari.
+- The daytime/nighttime selection changes the interface, but does not assert measured time-specific safety differences. There is no verified safe-route algorithm.
+- Reviews and "My ratings" are stored only in the local browser, not published to other users. There is no live member verification, real-time private messaging, or production database in this Buildathon prototype.
+- External public directory APIs may be rate-limited or unavailable. Maps require an internet connection. Location permission is optional.
+
+**Original product and compliance:** The team had previously developed a separate Naari application. The earlier product was used only to study the desired user experience and visual language. All application source in this fork was newly authored during the 18 November 2026 hacking window using AI-assisted development; no pre-existing project code was imported. The fork preserves the starter/genesis history and incremental implementation commits.
