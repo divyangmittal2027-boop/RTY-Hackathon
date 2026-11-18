@@ -62,8 +62,18 @@
   </section>
 
   <section id="inbox-page" class="secondary-page" hidden>
-    <div class="section-top"><p class="kicker">VERIFIED-ONLY</p><h1>Your sisterhood</h1><p>Message women in your city to connect and plan journeys together.</p></div>
-    <div class="empty-page"><div class="empty-illustration"><i data-lucide="message-circle"></i></div><h2>Join the sisterhood</h2><p>In the full Naari app, private messages are reserved for verified members. Messaging is not connected in this standalone hackathon prototype.</p><a class="solid-button" href="https://naari-divyangmittal2027-7248.vercel.app/" target="_blank" rel="noopener noreferrer">Visit existing Naari app <span>↗</span></a></div>
+    <div class="section-top"><p class="kicker">YOUR PRIVATE SPACE</p><h1>Your sisterhood</h1><p>Keep a personal safety journal. These notes are private to this browser and are never shared or published.</p></div>
+    <div class="journal-layout">
+      <div class="journal-intro"><div class="journal-icon"><i data-lucide="message-circle-heart"></i></div><div><h2>Your safety journal</h2><p>Noticed a poorly lit street? A helpful staff member? Save the details here so you can remember them later.</p></div></div>
+      <form id="journal-form" class="journal-form">
+        <label for="journal-entry">Write a private note</label>
+        <textarea id="journal-entry" rows="4" maxlength="500" placeholder="What happened? Where did you feel comfortable or uncomfortable?" required></textarea>
+        <div class="journal-form-bottom"><span>Only you can see notes saved on this device.</span><button type="submit" class="solid-button"><i data-lucide="plus"></i> Save note</button></div>
+      </form>
+      <div class="journal-list-head"><h3>My saved notes</h3><span id="journal-count">0 notes</span></div>
+      <div id="journal-notes" aria-live="polite"></div>
+      <p class="journal-footnote">Private messaging and verified community accounts are not enabled in this hackathon prototype.</p>
+    </div>
   </section>
 
   <section id="profile-page" class="secondary-page" hidden>
@@ -84,20 +94,24 @@
     <form id="rate-form" method="dialog">
       <div class="dialog-head"><div><small>RATE A PLACE</small><h2 id="rate-title">Rate a place</h2></div><button id="rate-close" type="button" class="round-close" aria-label="Close">×</button></div>
       <div class="rating-scroll">
-        <p class="rate-label">Creep Level</p><p class="rate-help">Staring, following, loitering · 1 = at ease, 10 = avoid.</p>
+        <div class="review-introduction"><span class="review-eyebrow">YOUR VOICE MATTERS</span><h3>How did this place feel?</h3><p>Tap the circles and stars below. Your experience helps you keep a clearer picture of this place.</p>
+          <div class="review-progress-heading"><span id="review-progress-label">0 of 4 ratings completed</span><span id="review-progress-percent">0%</span></div>
+          <div class="review-progress-track"><div id="review-progress-fill" class="review-progress-fill"></div></div>
+        </div>
+        <p class="rate-label">👀 Creep Level <span class="optional-hint">Required</span></p><p class="rate-help">Staring, following, loitering · 1 = at ease, 10 = avoid.</p>
         <div id="creep-input" class="creep-input"></div>
         <p id="creep-caption" class="creep-caption">Select a number</p>
-        <p class="rate-label">Safety (general)</p><div class="stars-group" id="safety-stars"></div>
-        <p class="rate-label">Hygiene</p><div class="stars-group" id="hygiene-stars"></div>
-        <p class="rate-label">Washroom</p><div class="stars-group" id="washroom-stars"></div>
-        <p class="rate-label">Vibe check</p><div class="chip-wrap" id="vibe-input"></div>
+        <p class="rate-label">🛡 Safety (general) <span class="optional-hint">Required</span></p><div class="stars-group" id="safety-stars"></div><p class="star-caption" id="safety-caption"></p>
+        <p class="rate-label">✦ Hygiene <span class="optional-hint">Required</span></p><div class="stars-group" id="hygiene-stars"></div><p class="star-caption" id="hygiene-caption"></p>
+        <p class="rate-label">🚻 Washroom <span class="optional-hint">Required</span></p><div class="stars-group" id="washroom-stars"></div><p class="star-caption" id="washroom-caption"></p>
+        <div class="rating-preview" id="rating-preview" aria-live="polite"></div><p class="rate-label">Vibe check <span class="optional-hint">Optional</span></p><div class="chip-wrap" id="vibe-input"></div>
         <p class="rate-label">Community tags ✨</p><div class="chip-wrap" id="tags-input"></div>
         <p class="rate-label">Infrastructure security</p><div class="chip-wrap" id="infra-input"></div>
         <label class="rate-label" for="rate-comment">Anything to add?</label>
         <textarea id="rate-comment" rows="3" maxlength="300" placeholder="Share details that help other women…"></textarea>
-        <p class="demo-disclosure">This demo saves your feedback on this device only. Ratings are not published to the live Naari community.</p>
+        <p class="demo-disclosure">Your ratings and comments are saved on this device only. No review or note is published to other users.</p>
       </div>
-      <button type="submit" class="solid-button submit-review">Save rating <span>→</span></button>
+      <button type="submit" class="solid-button submit-review" id="submit-review">Complete the four ratings <span>→</span></button>
     </form>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
