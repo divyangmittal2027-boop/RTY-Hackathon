@@ -1,4 +1,5 @@
 import { DEMO_PLACES } from './places.mjs';
+import { fetchPublicPlaces } from './places-provider.mjs';
 import { distanceKm } from './safety.mjs';
 
 // Rebuilt during the Buildathon as a standalone map-first prototype.
@@ -317,23 +318,35 @@ async function searchPublicPlace(q){
     renderSheet();renderPins();openPlace(found[0].id);
   }catch{notify('Online search unavailable. Try another name or use Google Maps.');}
 }
+let newestDirectoryRequest=0;
 async function fetchNearby(lat,lng){
-  state.loading=true;renderSheet();
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8500);
-  try {
-    const data='[out:json][timeout:8];(node(around:2200,'+lat+','+lng+')[amenity~"cafe|restaurant|pharmacy|hospital|police|clinic"];way(around:2200,'+lat+','+lng+')[amenity~"cafe|restaurant|pharmacy|hospital|police|clinic"];);out center 55;';
-    const response=await fetch('https://overpass.kumi.systems/api/interpreter?data='+encodeURIComponent(data),{signal:controller.signal});
-    if(!response.ok)throw Error('Place provider unavailable');
-    const json=await response.json();
-    const places=(json.elements||[]).map(x=>{
-      const lat=x.lat??x.center?.lat,lng=x.lon??x.center?.lon,name=x.tags?.name;
-      if(!name||!Number.isFinite(lat)||!Number.isFinite(lng))return null;
-      return {id:'osm-'+x.type+'-'+x.id,name,address:x.tags?.['addr:street']||x.tags?.['addr:city']||'Public OpenStreetMap listing',category:categoryFor(x.tags?.amenity||x.tags?.tourism||x.tags?.office),pinType:pinTypeFor(x.tags?.amenity||x.tags?.tourism||x.tags?.office),lat,lng,isDemo:false,source:'OpenStreetMap'};
-    }).filter(Boolean).slice(0,45);
-    const seen=new Set([...samples,...state.external].map(p=>p.id));
-    state.external=[...state.external,...places.filter(p=>!seen.has(p.id))].slice(-100);
-  }catch{setMessage('Public map listings are temporarily unavailable. Showing labelled sample places.');}
-  finally{clearTimeout(timer);state.loading=false;renderSheet();renderPins();}
+  const requestId=++newestDirectoryRequest;
+  state.loading=true;
+  renderSheet();
+  try{
+    const rows=await fetchPublicPlaces({lat,lng});
+    if(requestId!==newestDirectoryRequest)return;
+    const places=rows.map(p=>({
+      ...p,
+      category:categoryFor(p.amenity),
+      pinType:pinTypeFor(p.amenity),
+      isDemo:false
+    }));
+    const known=new Set([...samples,...state.external].map(p=>p.id));
+    const fresh=places.filter(p=>!known.has(p.id));
+    state.external=[...state.external,...fresh].slice(-140);
+  }catch(error){
+    if(requestId===newestDirectoryRequest){
+      console.warn('Directory providers unavailable:',String(error));
+      setMessage('Public map listings are temporarily unavailable. Showing labelled sample places.');
+    }
+  }finally{
+    if(requestId===newestDirectoryRequest){
+      state.loading=false;
+      renderSheet();
+      renderPins();
+    }
+  }
 }
 function locate(){
   if(!navigator.geolocation){setMessage('Location unavailable in this browser. Choose a city.');return;}
