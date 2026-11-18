@@ -235,6 +235,7 @@ function openPlace(id){
   state.selected=p;state.safetyMode=false;state.routeMode=false;
   $('#places-sheet').classList.add('expanded');state.expanded=true;
   renderSheet();renderPins();
+  $('#sheet-content').scrollTop=0;
   if(state.map)state.map.flyTo([p.lat,p.lng],Math.max(13,state.map.getZoom()),{duration:.5});
 }
 function backToPlaces(){
@@ -536,6 +537,7 @@ function saveRate(e){
   const saved=persist();
   $('#rate-dialog').close();
   renderSheet();renderPins();
+  $('#sheet-content').scrollTop=0;
   if(saved)notify('Your rating is saved on this device. You can edit it anytime.');
   else notify('Rating updated in this tab. Browser storage is unavailable.');
 }
