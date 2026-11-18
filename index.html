@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fff9f7" />
+  <meta name="description" content="Naari helps women evaluate nearby public spaces using transparent, community-led safety ratings." />
+  <title>Naari — Know before you go</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzx7r5nFLL7fE8ZZswm0fD5mJ8=" crossorigin="" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script type="module" src="./src/app.mjs"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a href="./" class="brand" aria-label="Naari home">
+        <span class="brand-mark">✳</span>
+        <span>naari<span class="brand-stop">.</span></span>
+      </a>
+      <span class="topbar-caption">A little more confidence, wherever you go.</span>
+      <div class="topbar-right">
+        <span class="live-label"><span class="live-dot"></span> DELHI NCR</span>
+        <a class="help-pill" href="tel:112" aria-label="Call emergency services 112">✳ <span>Emergency 112</span></a>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="sparkle">✦</span> SAFER SPACES START WITH SHARED STORIES</span>
+          <h1>Go places.<br><em>Feel more sure.</em></h1>
+          <p>Discover nearby spaces, see what other women notice, and share your own experience. Every voice makes the next visit easier.</p>
+          <div class="hero-actions">
+            <button id="locate-button" class="primary-button" type="button"><span>◎</span> Find places near me</button>
+            <span class="hint-text" id="location-status" aria-live="polite">Exploring around New Delhi</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-orbit art-orbit-outer"></div>
+          <div class="art-orbit art-orbit-inner"></div>
+          <span class="art-star star-one">✦</span><span class="art-star star-two">✳</span><span class="art-star star-three">✦</span>
+          <div class="art-bubble bubble-one"><span class="art-icon">☕</span><span><b>Good company</b><small>feels like safety</small></span></div>
+          <div class="art-bubble bubble-two"><span class="art-icon">✧</span><span><b>Community-led</b><small>real experiences</small></span></div>
+          <div class="art-core">N<span>✳</span></div>
+        </div>
+      </section>
+
+      <section class="discover-section" id="discover">
+        <div class="section-heading">
+          <div>
+            <span class="section-label">THE NEIGHBOURHOOD EDIT</span>
+            <h2>Find your kind of place<span class="tiny-pink">.</span></h2>
+          </div>
+          <span class="disclaimer-badge">✦ Sample venues & ratings for demo</span>
+        </div>
+
+        <div class="explore-grid">
+          <aside class="explore-panel">
+            <label class="search-field">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input id="place-search" type="search" placeholder="Search a place or neighbourhood" autocomplete="off" aria-label="Search places" />
+              <span class="search-shortcut">⌕</span>
+            </label>
+            <div class="filter-tabs" id="filters" role="group" aria-label="Filter places"></div>
+            <div class="results-header"><strong id="results-count">Places to explore</strong><span id="order-label">Curated for you</span></div>
+            <div class="place-list" id="places-list" aria-live="polite"></div>
+            <div class="sidebar-bottom"><span>✳</span><p>Not a safety certification. Ratings are subjective, and conditions may change.</p></div>
+          </aside>
+
+          <div class="map-and-detail">
+            <div class="map-card">
+              <div id="map" role="region" aria-label="Map of sample places in Delhi NCR">
+                <div class="map-fallback" id="map-fallback">
+                  <div class="fallback-grid"></div>
+                  <span class="fallback-text">Map loading…<small>The places list remains available without a map.</small></span>
+                </div>
+              </div>
+              <div class="map-top-label"><span class="map-dot"></span> Explore Delhi NCR <span class="map-separator">/</span> Interactive map</div>
+              <div class="map-bottom-label">Sample locations • Not real-time safety data</div>
+            </div>
+            <article class="detail-panel" id="place-detail" aria-live="polite"></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="explain-section">
+        <div><span class="section-label">HOW NAARI THINKS ABOUT SAFETY</span><h2>Not just stars.<br><em>Better questions.</em></h2></div>
+        <div class="explain-cards">
+          <div><span class="explain-icon">☼</span><strong>Lighting</strong><p>Was the space well-lit and visible?</p></div>
+          <div><span class="explain-icon">♡</span><strong>Staff support</strong><p>Did you feel heard and respected?</p></div>
+          <div><span class="explain-icon">✧</span><strong>Washrooms</strong><p>Were facilities accessible and comfortable?</p></div>
+          <div><span class="explain-icon">❋</span><strong>Comfort</strong><p>How did the overall experience feel?</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer><span class="footer-logo">naari<span>.</span></span><p>Designed for informed choices, powered by shared experiences.</p><span>Built during RTY Buildathon · 18 Nov 2026</span></footer>
+  </div>
+
+  <dialog id="review-dialog" class="review-dialog" aria-labelledby="review-title">
+    <form method="dialog" id="review-form">
+      <div class="modal-header"><span class="section-label">YOUR EXPERIENCE MATTERS</span><button type="button" id="close-review" aria-label="Close review form" class="icon-button">×</button></div>
+      <h2 id="review-title">Rate this place</h2>
+      <p id="review-subtitle">Four small observations can help someone make a more informed choice.</p>
+      <div id="rating-inputs"></div>
+      <label class="notes-label" for="review-notes">Anything else? <small>(optional)</small></label>
+      <textarea id="review-notes" rows="3" maxlength="280" placeholder="Share a detail that could help someone else."></textarea>
+      <p class="privacy-note">Your rating is saved on this device in this hackathon demo; it is not published to other users.</p>
+      <button type="submit" class="primary-button submit-button">Save my review <span>→</span></button>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
