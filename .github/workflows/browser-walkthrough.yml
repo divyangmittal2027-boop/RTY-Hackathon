@@ -1,0 +1,43 @@
+name: Naari browser walkthrough
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'src/original-look.mjs'
+      - 'tests/browser-smoke.cjs'
+      - '.github/workflows/browser-walkthrough.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner
+        run: |
+          npm install --no-save playwright@1.53.0
+          npx playwright install --with-deps chromium
+      - name: Start demo server
+        run: |
+          python3 -m http.server 8080 > /tmp/naari-server.log 2>&1 &
+          sleep 2
+      - name: Exercise map, rating, and profile
+        run: |
+          mkdir -p artifacts
+          node tests/browser-smoke.cjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: naari-browser-screenshots
+          path: artifacts/
+          retention-days: 3
