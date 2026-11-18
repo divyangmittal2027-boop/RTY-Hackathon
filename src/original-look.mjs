@@ -203,6 +203,7 @@ function renderSheet(){
     <div class="place-loc">⌖ ${state.location?'Your approximate location':esc(state.city.name)} · ${state.location?'Nearby results':'Allow location to see places near you'}</div>
     <p class="sheet-explain">Pin colours show place types. Safety ratings are shown separately.</p>
     <div class="filter-row">${FILTERS.map(f=>`<button class="filter-pill ${state.filter===f.id?'selected':''}" data-filter="${f.id}">${f.label}</button>`).join('')}</div>
+    <button type="button" class="add-personal-place" id="add-personal-place"><span>＋</span> Can’t find a place? Add it to rate</button>
     ${state.loading?'<p class="data-notice">Finding nearby public places from OpenStreetMap…</p>':''}
     <p class="data-notice">Sample ratings are for illustration only. Public listings with grey pins have no community safety assessment.</p>
     <div class="map-legend">
@@ -221,12 +222,13 @@ function renderSheet(){
       const r=rating(p);
       return `<button class="place-row" data-place="${esc(p.id)}">
         <span class="place-icon ${p.category}"><i data-lucide="${icon(p.category)}"></i></span>
-        <span class="place-description"><strong>${esc(p.name)}</strong><small>${p.isDemo?'Sample community ratings · ':'Public listing · '}${esc(p.address||p.category)}${r.count?' · Creep '+r.creep+'/10':''}</small></span>
+        <span class="place-description"><strong>${esc(p.name)}</strong><small>${p.isDemo?'Sample demo ratings · ':p.source==='Personal place'?'Personal place · ':'Public listing · '}${esc(p.address||p.category)}${r.count?' · Creep '+r.creep+'/10':''}</small></span>
         <span class="score-disc ${r.color}">${r.score??'–'}</span>
       </button>`;
     }).join(''):'<div class="empty-list">No nearby places found. Try another category or city, or search for a specific place.</div>'}
     </div>`;
   sheet.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{state.filter=btn.dataset.filter;renderSheet();renderPins();});
+  $('#add-personal-place').onclick=openAddPlace;
   sheet.querySelectorAll('[data-place]').forEach(btn=>btn.onclick=()=>openPlace(btn.dataset.place));
   refreshIcons();
 }
@@ -273,7 +275,7 @@ function renderDetails(sheet,p){
       ${ownerTags.length?`<div class="tag-preview">${ownerTags.map(tag=>`<span>${esc(tag)}</span>`).join('')}</div>`:''}
       <small>Saved privately in this browser · You can edit your review below.</small>
      </section>`:'<div class="demo-warning">You haven’t rated this place yet. Your first review can help you track your own experience.</div>'}
-    ${p.isDemo?'<div class="demo-warning">This venue and its preset feedback are fictional demonstration data. Scores are illustrative, not an indication of actual safety.</div>':'<div class="demo-warning">Public directory listing. Naari has not verified operating hours, facilities, or the safety of this place.</div>'}
+    ${p.isDemo?'<div class="demo-warning">This venue and its preset feedback are fictional demonstration data. Scores are illustrative, not an indication of actual safety.</div>':p.source==='Personal place'?'<div class="demo-warning">You added this place on this device. Its name and pin location are not verified or publicly published.</div>':'<div class="demo-warning">Public directory listing. Naari has not verified operating hours, facilities, or the safety of this place.</div>'}
     <div class="actions-row">
       <button type="button" class="solid-button" id="rate-current">${owner?'✎ Edit my rating':r.count?'✦ Add my rating':'✦ Be the first to rate'}</button>
       <button type="button" class="outline-button" id="directions-current">Get directions ↗</button>
@@ -474,6 +476,39 @@ function renderProfile(){
     notify(stored?'Your rating was removed':'Could not save this change on your device');
   });
 }
+function openAddPlace(){
+  $('#add-place-form').reset();
+  const center=state.map?.getCenter();
+  const lat=center?.lat??state.city.lat, lng=center?.lng??state.city.lng;
+  $('#new-place-location-summary').textContent=`Approximate map centre: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  $('#add-place-dialog').showModal();
+  refreshIcons();
+}
+function savePersonalPlace(event){
+  event.preventDefault();
+  const name=$('#new-place-name').value.trim().slice(0,80);
+  const address=$('#new-place-area').value.trim().slice(0,120);
+  const category=$('#new-place-category').value;
+  if(!name||!address){notify('Enter a place name and neighbourhood.');return;}
+  if(!FILTERS.some(f=>f.id===category)){notify('Choose a valid place category.');return;}
+  const center=state.map?.getCenter();
+  const lat=center?.lat??state.city.lat,lng=center?.lng??state.city.lng;
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)){notify('Unable to determine approximate pin location.');return;}
+  const place={
+    id:'personal-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),
+    name,address,area:address,lat,lng,category,pinType:pinTypeFor(category),
+    isDemo:false,source:'Personal place',
+    description:'This place was added on your device. Its location is approximate.'
+  };
+  persistKnownPlace(place);
+  state.external=[...state.external,place].slice(-140);
+  state.filter='all';state.query='';$('#map-search').value='';
+  $('#clear-search').hidden=true;$('#search-suggestions').hidden=true;
+  $('#add-place-dialog').close();
+  openPlace(place.id);
+  openRate(place);
+  notify('Personal place added. Rate it to save your experience.');
+}
 function openRate(place){
   state.selected=place;
   const prev=state.reviews[place.id]||{};
@@ -549,6 +584,8 @@ function init(){
   $$('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
   $('#profile-city-link').onclick=()=>switchTab('cities');
   $('#journal-form').addEventListener('submit',saveJournal);
+  $('#add-place-form').addEventListener('submit',savePersonalPlace);
+  $('#close-add-place').onclick=()=>$('#add-place-dialog').close();
   renderJournal();
   $('#map-search').addEventListener('input',filterSearch);
   $('#map-search').addEventListener('keydown',e=>{
