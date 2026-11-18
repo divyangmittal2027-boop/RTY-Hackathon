@@ -34,7 +34,7 @@ const PLACES_KEY='naari-map-saved-public-places-2026-11-18';
 const state = {
   city:CITIES[0], period:'day', filter:'all', query:'', selected:null,
   map:null, pins:new Map(), location:null, locationMarker:null, expanded:false,
-  routeMode:false, safetyMode:false, external:loadKnownPlaces(), loading:false,
+  routeMode:false, safetyMode:false, external:loadKnownPlaces(), loading:false, directoryText:'Find places near you · OpenStreetMap directory',
   reviews:loadSaved(), draft:null, searchTimer:null
 };
 
@@ -206,6 +206,10 @@ function renderSheet(){
     <button type="button" class="add-personal-place" id="add-personal-place"><span>＋</span> Can’t find a place? Add it to rate</button>
     ${state.loading?'<p class="data-notice">Finding nearby public places from OpenStreetMap…</p>':''}
     <p class="data-notice">Sample ratings are for illustration only. Public listings with grey pins have no community safety assessment.</p>
+    <div class="directory-actions">
+      <button type="button" id="scan-nearby" class="scan-nearby"><i data-lucide="radar"></i> Scan nearby cafés & restaurants</button>
+      <span id="directory-status" aria-live="polite">${esc(state.directoryText)}</span>
+    </div>
     <div class="map-legend">
       <span><i class="legend-dot type-cafe"></i>Café</span>
       <span><i class="legend-dot type-restaurant"></i>Restaurant</span>
@@ -229,6 +233,7 @@ function renderSheet(){
     </div>`;
   sheet.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{state.filter=btn.dataset.filter;renderSheet();renderPins();});
   $('#add-personal-place').onclick=openAddPlace;
+  $('#scan-nearby').onclick=()=>{const center=state.map?.getCenter();fetchNearby(center?.lat??state.city.lat,center?.lng??state.city.lng);};
   sheet.querySelectorAll('[data-place]').forEach(btn=>btn.onclick=()=>openPlace(btn.dataset.place));
   refreshIcons();
 }
@@ -349,6 +354,7 @@ let newestDirectoryRequest=0;
 async function fetchNearby(lat,lng){
   const requestId=++newestDirectoryRequest;
   state.loading=true;
+  state.directoryText='Looking for cafés, restaurants and services within roughly 3.5 km…';
   renderSheet();
   try{
     const rows=await fetchPublicPlaces({lat,lng});
@@ -361,10 +367,12 @@ async function fetchNearby(lat,lng){
     }));
     const known=new Set([...samples,...state.external].map(p=>p.id));
     const fresh=places.filter(p=>!known.has(p.id));
-    state.external=[...state.external,...fresh].slice(-140);
+    state.external=[...state.external,...fresh].slice(-250);
+    state.directoryText=`Found ${places.length} public map listings near this point · ${fresh.length} newly discovered. Tap a venue to rate it.`;
   }catch(error){
     if(requestId===newestDirectoryRequest){
       console.warn('Directory providers unavailable:',String(error));
+      state.directoryText='Live directory unavailable. Try Scan again or add a place manually.';
       setMessage('Public map listings are temporarily unavailable. Showing labelled sample places.');
     }
   }finally{
@@ -448,8 +456,93 @@ function saveJournal(event){
     notify('Private note saved on this device');
   }catch{notify('Browser storage is unavailable. Note could not be saved.');}
 }
+const DEMO_KEY='naari-hackathon-demo-session-v1';
+const PROFILE_KEY='naari-hackathon-profile-v1';
+function readProfile(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');
+    return {
+      name: typeof raw.name==='string' ? raw.name.slice(0,48) : '',
+      bio: typeof raw.bio==='string' ? raw.bio.slice(0,220) : '',
+      photo: typeof raw.photo==='string' && raw.photo.startsWith('data:image/') ? raw.photo : ''
+    };
+  }catch{return {name:'',bio:'',photo:''};}
+}
+function writeProfile(p){
+  try{localStorage.setItem(PROFILE_KEY,JSON.stringify(p));return true;}
+  catch{notify('Browser storage full. Try a smaller photo or remove your current picture.');return false;}
+}
+function updateProfileView(){
+  const data=readProfile();
+  $('#profile-display-name').value=data.name||'';
+  $('#profile-bio').value=data.bio||'';
+  $('#profile-headline').textContent=data.name||'Your profile';
+  $('#profile-rating-count').textContent=String(Object.keys(state.reviews).length);
+  $('#profile-place-count').textContent=String(allPlaces().length);
+  $('#profile-journal-count').textContent=String(getJournal().length);
+  const image=$('#profile-photo');
+  image.hidden=!data.photo;
+  if(data.photo)image.src=data.photo;else image.removeAttribute('src');
+  $('#profile-avatar-fallback').hidden=!!data.photo;
+}
+function saveProfile(event){
+  event.preventDefault();
+  const name=$('#profile-display-name').value.trim().slice(0,48);
+  const bio=$('#profile-bio').value.trim().slice(0,220);
+  const p=readProfile();
+  p.name=name;p.bio=bio;
+  if(writeProfile(p)){updateProfileView();notify('Your demo profile has been saved ✓');}
+}
+function uploadAvatar(event){
+  const file=event.target.files?.[0];
+  if(!file)return;
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>3*1024*1024){
+    notify('Choose a JPG, PNG or WebP image smaller than 3 MB.');
+    event.target.value='';return;
+  }
+  const reader=new FileReader();
+  reader.onerror=()=>notify('Could not read this image.');
+  reader.onload=()=>{
+    const source=new Image();
+    source.onerror=()=>notify('Could not open this image.');
+    source.onload=()=>{
+      const scale=Math.min(1,320/Math.max(source.width,source.height));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(source.width*scale));
+      canvas.height=Math.max(1,Math.round(source.height*scale));
+      const ctx=canvas.getContext('2d');
+      if(!ctx){notify('Photo processing is unavailable.');return;}
+      ctx.drawImage(source,0,0,canvas.width,canvas.height);
+      const photo=canvas.toDataURL('image/jpeg',0.8);
+      const p=readProfile();p.photo=photo;
+      if(writeProfile(p)){updateProfileView();notify('Your profile picture has been updated');}
+    };
+    source.src=String(reader.result);
+  };
+  reader.readAsDataURL(file);
+}
+function enterDemo(event){
+  event.preventDefault();
+  const name=$('#demo-name').value.trim().slice(0,48);
+  const p=readProfile();
+  if(name && !p.name){p.name=name;writeProfile(p);}
+  try{localStorage.setItem(DEMO_KEY,'yes');}catch{}
+  $('#welcome-overlay').hidden=true;
+  renderProfile();refreshIcons();
+  if(state.map)requestAnimationFrame(()=>state.map.invalidateSize());
+  notify('Welcome to Naari ✦ You are browsing in demo mode');
+}
+function initWelcome(){
+  let entered=false;
+  try{entered=localStorage.getItem(DEMO_KEY)==='yes';}catch{}
+  $('#welcome-overlay').hidden=entered;
+  $('#welcome-form').addEventListener('submit',enterDemo);
+  $('#profile-edit-form').addEventListener('submit',saveProfile);
+  $('#profile-avatar-input').addEventListener('change',uploadAvatar);
+}
 function renderProfile(){
   $('#profile-city').textContent=state.city.name;
+  updateProfileView();
   const reviews=Object.entries(state.reviews).sort((a,b)=>(b[1].updatedAt||'').localeCompare(a[1].updatedAt||''));
   $('#my-ratings').innerHTML=reviews.length?reviews.map(([id,r])=>{
     const p=allPlaces().find(x=>x.id===id);
@@ -577,6 +670,7 @@ function saveRate(e){
   else notify('Rating updated in this tab. Browser storage is unavailable.');
 }
 function init(){
+  initWelcome();
   renderCityChips();
   renderCityGrid();
   initMap();
