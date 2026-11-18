@@ -23,6 +23,21 @@ const fs = require('node:fs');
   await page.locator('.bottom-tabs [data-tab="profile"]').click();
   if (!(await page.locator('#my-ratings').innerText()).includes('Safety')) throw Error('My ratings not populated');
   await page.screenshot({ path: 'artifacts/naari-profile.png', fullPage: true });
+  // Original Naari is inspected as a design reference only: never import its code.
+  const reference = await browser.newPage({ viewport:{ width:390, height:844 } });
+  for (const url of [
+    'https://naari-divyangmittal2027-7248.vercel.app/',
+    'https://solo-shield-1.emergent.host/'
+  ]) {
+    try {
+      await reference.goto(url, { waitUntil:'domcontentloaded', timeout:12000 });
+      await reference.waitForTimeout(1200);
+      await reference.screenshot({ path:'artifacts/naari-original-reference.png', fullPage:true });
+      console.log('Captured original Naari UI for comparison:',url);
+      break;
+    } catch (error) { console.log('Original reference unavailable at:',url,String(error).slice(0,120)); }
+  }
+  await reference.close();
   if (browserErrors.length) throw Error('Browser runtime errors: '+browserErrors.join('; '));
   await browser.close();
   console.log('Naari E2E PASS: map, city switch, detail, rating persistence, profile');
