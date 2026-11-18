@@ -5,3 +5,33 @@
 .naari-pin.category-landmark{border-color:#adb5a3}
 .naari-pin.category-help{border-color:#d98577}
 .sheet-handle-bar{touch-action:none;user-select:none}
+
+/* The live Naari reference uses unobtrusive, type-coded map markers. */
+:root{
+  --cafe:#e8ab20;
+  --restaurant:#2978c1;
+  --attraction:#7449ab;
+  --pharmacy:#0c8b70;
+  --clinic:#bd377e;
+  --hospital:#bd4b61;
+  --police:#40386e;
+  --embassy:#087e91;
+  --other-help:#607887;
+}
+.type-pin{width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px #161f2450;background:var(--attraction);transition:transform .12s}
+.type-pin.active{width:23px;height:23px;border:3px solid #fff;outline:3px solid #9eaf90a0;transform:translate(-3px,-3px)}
+.type-pin.type-cafe,.legend-dot.type-cafe{background:var(--cafe)}
+.type-pin.type-restaurant,.legend-dot.type-restaurant{background:var(--restaurant)}
+.type-pin.type-attraction,.legend-dot.type-attraction{background:var(--attraction)}
+.type-pin.type-pharmacy,.legend-dot.type-pharmacy{background:var(--pharmacy)}
+.type-pin.type-clinic,.legend-dot.type-clinic{background:var(--clinic)}
+.type-pin.type-hospital,.legend-dot.type-hospital{background:var(--hospital)}
+.type-pin.type-police,.legend-dot.type-police{background:var(--police)}
+.type-pin.type-embassy,.legend-dot.type-embassy{background:var(--embassy)}
+.type-pin.type-other-help,.legend-dot.type-other-help{background:var(--other-help)}
+.map-legend{display:flex;gap:7px 9px;flex-wrap:wrap;margin:16px 0 9px;align-items:center}
+.map-legend span{font-size:11px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;color:#484543}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:0 0 10px}
+/* Match the newer original build: keep emergencies accessible from the Safe action. */
+.emergency-banner{display:none}
+.prototype-mark{display:none}
