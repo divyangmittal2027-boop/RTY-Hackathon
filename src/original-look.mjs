@@ -675,6 +675,18 @@ function drawRate(){
     $('#rating-preview').innerHTML='<div class="preview-sparkle">✦</div><div><b>Each rating tells part of the story.</b><p>Complete four required ratings to preview your personal assessment.</p></div>';
   }
 }
+function returnFromRating(){
+  const destination=state.ratingReturn;
+  state.ratingReturn=null;
+  if(destination==='profile'){
+    backToPlaces();
+    switchTab('profile');
+  }
+}
+function dismissRating(){
+  $('#rate-dialog').close();
+  returnFromRating();
+}
 function saveRate(e){
   e.preventDefault();
   if(!state.selected||!state.draft)return;
@@ -688,6 +700,7 @@ function saveRate(e){
   $('#rate-dialog').close();
   renderSheet();renderPins();
   $('#sheet-content').scrollTop=0;
+  returnFromRating();
   if(saved)notify('Your rating is saved on this device. You can edit it anytime.');
   else notify('Rating updated in this tab. Browser storage is unavailable.');
 }
@@ -763,12 +776,11 @@ function init(){
     $('#places-sheet').classList.toggle('expanded',state.expanded);
   };
   $('#rate-form').addEventListener('submit',saveRate);
-  $('#rate-close').onclick=()=>$('#rate-dialog').close();
-  $('#rate-dialog').addEventListener('close',()=>{
-    const returnTo=state.ratingReturn;state.ratingReturn=null;
-    if(returnTo==='profile'){backToPlaces();switchTab('profile');}
-  });
-  $('#rate-dialog').addEventListener('click',e=>{if(e.target===$('#rate-dialog'))$('#rate-dialog').close();});
+  $('#rate-close').onclick=dismissRating;
+  // Escape and outside-click also return to Profile when the rating originated there.
+  $('#rate-dialog').addEventListener('close',returnFromRating);
+  $('#rate-dialog').addEventListener('cancel',returnFromRating);
+  $('#rate-dialog').addEventListener('click',e=>{if(e.target===$('#rate-dialog'))dismissRating();});
   const hash=(location.hash||'').replace('#','');
   if(['cities','inbox','profile'].includes(hash))switchTab(hash);
   refreshIcons();
