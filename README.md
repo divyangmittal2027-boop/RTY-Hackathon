@@ -120,6 +120,11 @@ See [RULES.md](RULES.md) for the full list.
 
 ### Naari — Your city, your sisterhood
 
+**🌐 Live Hackathon Demo:** https://divyangmittal2027-boop.github.io/RTY-Hackathon/
+
+**Quick judge flow:** Open the live demo → enter an optional name → tap Explore Naari → Scan nearby cafés & restaurants → select a venue → submit a safety review → open Profile and add a photo/bio → see My Ratings. No real login credentials are required.
+
+
 **Team:** Naari · **Track:** Build for the Physical World (`physical-world`)
 
 **Problem:** Ordinary review systems prioritize food, service, and ambiance, but rarely tell women whether a place has practical conditions that affect confidence and safety. People need to know more than an average star rating: staff behaviour, possible harassment, hygiene, and access to help matter.
