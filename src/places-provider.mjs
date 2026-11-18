@@ -32,6 +32,50 @@ export function normalizeOverpass(json) {
   return results;
 }
 
+export function normalizePhoton(json) {
+  const features=Array.isArray(json?.features)?json.features:[];
+  const seen=new Set(),rows=[];
+  for(const feature of features){
+    const p=feature?.properties||{};
+    const [lng,lat]=feature?.geometry?.coordinates||[];
+    const name=typeof p.name==='string'?p.name.trim():'';
+    const category=String(p.osm_value||'').toLowerCase();
+    if(!name||!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)continue;
+    if(!['cafe','restaurant','fast_food','food_court'].includes(category))continue;
+    const id='photon-'+String(p.osm_type||'N')+'-'+String(p.osm_id||name+'-'+lat+'-'+lng);
+    if(seen.has(id))continue;
+    seen.add(id);
+    rows.push({id,name,lat,lng,amenity:category,
+      address:[p.street,p.city,p.state].filter(Boolean).join(', ')||'OpenStreetMap public directory',
+      source:'OpenStreetMap (Photon)'});
+  }
+  return rows;
+}
+
+async function fetchPhotonNearby({lat,lng,request,timeoutMs=6500}) {
+  // The public Photon demo supports reverse lookups restricted by OSM amenity tag.
+  // Queries are limited in number to respect its fair-use policy.
+  const collected=[],seen=new Set();
+  for(const amenity of ['cafe','restaurant']){
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const url='https://photon.komoot.io/reverse?lat='+encodeURIComponent(lat)
+        +'&lon='+encodeURIComponent(lng)
+        +'&radius=3.5&limit=50&osm_tag=amenity:'+amenity;
+      const res=await request(url,{signal:controller.signal,headers:{Accept:'application/json'}});
+      if(!res.ok)continue;
+      const json=await res.json();
+      for(const row of normalizePhoton(json)){
+        if(seen.has(row.id))continue;
+        seen.add(row.id);
+        collected.push(row);
+      }
+    }catch{ /* One provider failure must not block the other. */ }
+    finally{clearTimeout(timeout);}
+  }
+  return collected;
+}
+
 export function makeOverpassQuery(lat,lng) {
   const latitude=Number(lat),longitude=Number(lng);
   if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180){
@@ -69,5 +113,7 @@ export async function fetchPublicPlaces({
       clearTimeout(timeout);
     }
   }
+  const photon=await fetchPhotonNearby({lat,lng,request,timeoutMs:Math.min(timeoutMs,6500)});
+  if(photon.length)return photon;
   throw lastError;
 }
