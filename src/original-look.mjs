@@ -686,6 +686,12 @@ function init(){
   renderSheet();
   $$('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
   $('#profile-city-link').onclick=()=>switchTab('cities');
+  $('#back-to-welcome').onclick=()=>{
+    try{localStorage.removeItem(DEMO_KEY);}catch{}
+    $('#demo-name').value=readProfile().name;
+    $('#welcome-overlay').hidden=false;
+    notify('You can re-enter demo mode without a password.');
+  };
   $('#journal-form').addEventListener('submit',saveJournal);
   $('#add-place-form').addEventListener('submit',savePersonalPlace);
   $('#close-add-place').onclick=()=>$('#add-place-dialog').close();
