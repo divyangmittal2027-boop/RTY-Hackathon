@@ -114,6 +114,26 @@
       <button type="submit" class="solid-button submit-review" id="submit-review">Complete the four ratings <span>→</span></button>
     </form>
   </dialog>
+  <dialog id="add-place-dialog" class="rate-dialog add-place-dialog" aria-labelledby="add-place-title">
+    <form id="add-place-form">
+      <div class="dialog-head"><div><small>YOUR PERSONAL MAP</small><h2 id="add-place-title">Add a place to rate</h2></div><button type="button" id="close-add-place" class="round-close" aria-label="Close">×</button></div>
+      <div class="add-place-illustration"><i data-lucide="map-pin-plus"></i><div><strong>Put your experience on the map</strong><p>Can't find a café, restaurant or spot? Add it here and give it a personal rating.</p></div></div>
+      <label class="add-place-label" for="new-place-name">Place name <span>*</span></label>
+      <input id="new-place-name" name="place_name" maxlength="80" required placeholder="e.g. My local bookstore" autocomplete="off">
+      <label class="add-place-label" for="new-place-area">Neighbourhood / area <span>*</span></label>
+      <input id="new-place-area" name="area" maxlength="120" required placeholder="e.g. Connaught Place, Delhi" autocomplete="off">
+      <label class="add-place-label" for="new-place-category">Type of place</label>
+      <select id="new-place-category" name="category">
+        <option value="cafe">Café</option>
+        <option value="restaurant">Restaurant</option>
+        <option value="landmark">Attraction / other</option>
+        <option value="help">Help / essentials</option>
+      </select>
+      <div class="add-place-location"><i data-lucide="crosshair"></i><div><b>Where will the map pin appear?</b><p id="new-place-location-summary">At the centre of your map view</p><small>To improve the pin location, move the map to the place before opening this form.</small></div></div>
+      <p class="demo-disclosure">This personal place is stored on this device only. Its map location is approximate, not verified, and it will not be published to anyone else.</p>
+      <button type="submit" class="solid-button submit-review">Save place & rate it <span>→</span></button>
+    </form>
+  </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 </body>
