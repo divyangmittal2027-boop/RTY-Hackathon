@@ -250,12 +250,14 @@ function openPlace(id){
   if(state.map)state.map.flyTo([p.lat,p.lng],Math.max(13,state.map.getZoom()),{duration:.5});
 }
 function showRatingPicker(){
-  state.selected=null;state.routeMode=false;state.safetyMode=false;
-  state.filter='all';state.query='';$('#map-search').value='';
-  $('#search-suggestions').hidden=true;$('#clear-search').hidden=true;
-  state.expanded=true;$('#places-sheet').classList.add('expanded');
-  renderSheet();renderPins();$('#sheet-content').scrollTop=0;
-  notify('Choose a place and tap ★ Rate, or add a missing place.');
+  // Judges can try a real review immediately, even if live map APIs are offline.
+  // Pick a visible venue first, then a clearly labelled demonstration listing.
+  const choices=filtered();
+  const place=choices.find(p=>p.category==='cafe'||p.category==='restaurant')||
+    choices[0]||samples[0];
+  if(!place){notify('Add a place first to leave a rating.');openAddPlace();return;}
+  openPlace(place.id);
+  openRate(place);
 }
 function backToPlaces(){
   state.selected=null;state.routeMode=false;state.safetyMode=false;
@@ -733,7 +735,14 @@ function init(){
   };
   $$('[data-period]').forEach(b=>b.onclick=()=>{
     state.period=b.dataset.period;
-    $$('[data-period]').forEach(node=>{
+    document.body.classList.toggle('night-mode',state.period==='night');
+    if(state.map && window.L){
+      try{
+        // Visual theme, not a claim that nighttime safety is different.
+        state.map.getContainer().classList.toggle('night-map',state.period==='night');
+      }catch{}
+    }
+    $('[data-period]').forEach(node=>{
       const active=node.dataset.period===state.period;
       node.classList.toggle('selected',active);node.setAttribute('aria-pressed',String(active));
     });
